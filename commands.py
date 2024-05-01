@@ -25,7 +25,6 @@ from src.data.prepare import (
     split_and_save,
 )
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Datum, Sentence
-from src.openai import get_logit_bias
 from src.training.model import (
     ALL_LABELS,
     get_base_model,
@@ -33,6 +32,7 @@ from src.training.model import (
     load_model_from_checkpoint,
 )
 from src.training.train import test_predict, train_model
+from src.data.generate import generate_tags
 
 app = typer.Typer()
 
@@ -70,6 +70,13 @@ def save_hf_ds(version: str = "v0"):
 
 
 @app.command()
+def save_training_ds(version: str = "v0"):
+    create_candidate_dataset(version)
+    ds = load_candidate_ds(version)
+    split_and_save(ds, version)
+
+
+@app.command()
 def train():
     ds = load_for_training()
     _, trainer = train_model(ds)
@@ -85,13 +92,23 @@ def download_cl():
 def process_cl_docs():
     docs: Dataset = load_raw_cl_docket_entries_ds()
     print(docs.column_names)
-    subset = docs.select(range(33, 36))
+    subset = docs.select(range(49, 51))
 
     tasks = []
     for d in subset:
         tasks.append(process_cl_doc(d))  # pyright: ignore
 
     asyncio.run(gather_wrapper(tasks))
+
+
+@app.command()
+def test_mistral_labeling():
+    text = "The quick brown fox jumps over the lazy dog. Hox v. Doe, 123 U.S. 456, 499 (2021)."
+    tokenizer = get_tokenizer()
+
+    tokens = tokenizer.tokenize(text)
+    res = asyncio.run(generate_tags(text, tokens))
+    print(res)
 
 
 @app.command()
@@ -102,9 +119,7 @@ def test_model():
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = (
-        "which? Scheuer v. Rhodes, 416 U.S. 232, 94 S.Ct. 1683, 40 L.Ed.2d 90 (1974)."
-    )
+    text = "which it comes from. Rhodes, 416 U.S. at 23."
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
 

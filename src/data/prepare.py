@@ -151,6 +151,7 @@ async def process_cl_doc(doc: Dict):
         )
     except Exception as e:
         msg.fail(f"Error processing doc {doc_id}:\n{e}")
+        raise e
 
 
 def get_jsonl_files():

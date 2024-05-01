@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, TypedDict, get_type_hints
 
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Sentence
 from src.openai import chat
+from src.mistral import chat as mistral_chat
 from src.training.model import ALL_LABELS
 
 sentence_schema = get_type_hints(Sentence)

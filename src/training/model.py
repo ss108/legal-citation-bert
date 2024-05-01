@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Optional
 
+
+from wasabi import msg
 import torch
 from transformers import AutoConfig, AutoModelForTokenClassification, AutoTokenizer
 
@@ -87,6 +89,7 @@ def load_model_from_checkpoint(timestamp: Optional[str] = None):
             raise FileNotFoundError(
                 f"No checkpoint directory found for timestamp {timestamp}"
             )
+
     else:
         # If no timestamp is provided, find the most recent checkpoint directory
         checkpoint_dir = max(
@@ -98,6 +101,8 @@ def load_model_from_checkpoint(timestamp: Optional[str] = None):
             raise FileNotFoundError(
                 "No checkpoint directories found in the training output directory."
             )
+
+    msg.info(f"Loading model from checkpoint directory {checkpoint_dir}")
 
     # Find the checkpoint within the selected directory
     checkpoint_path = next(checkpoint_dir.glob("checkpoint-*"), None)
