@@ -1,0 +1,26 @@
+version: '3.8'
+
+volumes:
+  pdm_cache:
+  nltk_data:
+  hf_cache:  
+
+services:
+  main:
+    build: .
+    volumes:
+      - ./:/project
+      - hf_cache:/hf_cache  
+      - nltk_data:/root/nltk_data
+    container_name: cit 
+    environment:
+      - PDM_PYTHON=/usr/local/bin/python
+      - HF_HOME=/hf_cache  
+      - NLTK_DATA=/root/nltk_data
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
