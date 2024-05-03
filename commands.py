@@ -37,7 +37,7 @@ def save_ds():
 @app.command()
 def gen_sentences():
     args = DataGenerationArgs(
-        cit_form=CIT_FORM.LONG, cit_type=CIT_TYPE.STATUTE, number=20
+        cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
     )
     asyncio.run(do_sentences(args))  # pyright: ignore
 
@@ -113,7 +113,7 @@ def test_model():
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = """ See Ohio Public Employees Retirement Sys. v. Betts, 492 U.S. 158, 167, 181, 109 S.Ct. 2854, 106 L.Ed.2d 134 (1989); see also Parker, 121 F.3d at 1014 n. 5. Because  """
+    text = """ sentencing him to 24 months’ imprisonment on one count of possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a) & (b)(1)(C), and 60 """
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
 
