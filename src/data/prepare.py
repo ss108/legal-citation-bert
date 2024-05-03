@@ -1,15 +1,13 @@
 import asyncio
+import shutil
 import glob
-import json
 import time
 from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
-import regex as re
 import spacy
 from datasets import Dataset, DatasetDict, load_dataset
-from sklearn.model_selection import train_test_split
 from wasabi import msg
 
 from src.training.model import LABEL_MAP, get_tokenizer
@@ -17,8 +15,6 @@ from src.training.model import LABEL_MAP, get_tokenizer
 from .generate import generate, generate_tags
 from .manage_datasets import (
     get_formatted_dataset,
-    get_full_dataset,
-    store_formatted_dataset,
 )
 from .types import DataGenerationArgs, Datum, Sentence
 
@@ -34,8 +30,12 @@ async def do_sentences(a: DataGenerationArgs):
     data: List[Datum] = await sents_to_data(res)
 
     df = pd.DataFrame([x.dict() for x in data])
+    file_name = f"{RAW_DATA_DIR}/sentences_gen_{a.cit_type.name}_{a.cit_form.name}_{int(time.time())}.jsonl"
+
+    msg.info(f"Saving to {file_name}")
+
     df.to_json(
-        f"{RAW_DATA_DIR}/sentences_gen_{a.cit_type.name}_{a.cit_form.name}_{int(time.time())}.jsonl",
+        file_name,
         orient="records",
         lines=True,
     )
@@ -237,8 +237,8 @@ def load_for_training(version: str = "v0") -> DatasetDict:
             return_tensors="pt",
         )
 
-        input_ids = encoding["input_ids"].squeeze()
-        attention_mask = encoding["attention_mask"].squeeze()
+        input_ids = encoding["input_ids"].squeeze()  # pyright: ignore
+        attention_mask = encoding["attention_mask"].squeeze()  # pyright: ignore
 
         # Map labels and apply the same padding/truncation
         labels = [-100] + [LABEL_MAP[label] for _, label in row["tags"]] + [-100]
@@ -268,6 +268,4 @@ def load_final_splits():
 
 
 def delete_from_cache(name: str):
-    import shutil
-
     shutil.rmtree(Path(HF_CACHE_DIR) / name)

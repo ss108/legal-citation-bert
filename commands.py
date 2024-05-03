@@ -1,22 +1,14 @@
 import asyncio
-import json
-import time
-from typing import Dict, List, Tuple
 
-import pandas as pd
 import torch
 import typer
-from datasets import Dataset, DatasetDict
-from eyecite import get_citations
-from wasabi import msg
+from datasets import Dataset
 
-from src.data.inspect import inspect_cl
 from src.data.prepare import (
     create_candidate_dataset,
     delete_from_cache,
     do_sentences,
     gather_wrapper,
-    get_formatted_dataset,
     load_candidate_ds,
     load_for_training,
     load_raw_cl_docket_entries_ds,
@@ -24,7 +16,7 @@ from src.data.prepare import (
     save_cl_docket_entries_ds,
     split_and_save,
 )
-from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Datum, Sentence
+from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
 from src.training.model import (
     ALL_LABELS,
     get_base_model,
@@ -44,7 +36,9 @@ def save_ds():
 
 @app.command()
 def gen_sentences():
-    args = DataGenerationArgs(cit_form=CIT_FORM.LONG, cit_type=CIT_TYPE.CASE, number=50)
+    args = DataGenerationArgs(
+        cit_form=CIT_FORM.LONG, cit_type=CIT_TYPE.STATUTE, number=20
+    )
     asyncio.run(do_sentences(args))  # pyright: ignore
 
 
@@ -119,7 +113,7 @@ def test_model():
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = "which it comes from. Rhodes, 416 U.S. at 23."
+    text = """ See Ohio Public Employees Retirement Sys. v. Betts, 492 U.S. 158, 167, 181, 109 S.Ct. 2854, 106 L.Ed.2d 134 (1989); see also Parker, 121 F.3d at 1014 n. 5. Because  """
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
 

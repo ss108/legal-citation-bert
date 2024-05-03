@@ -249,6 +249,10 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     'I-SECTION'), (')', 'I-SECTION'), ('(', 'I-SECTION'), ('3', 'I-SECTION'),
     (')' 'I-SECTION'),]
 
+    FULL EXAMPLE 6:
+    Text: 'industry. See 42 U.S .C. § 12201(c).'
+    Tags: [('industry', 'O'), ('.', 'O'), ('See', 'O'), ('42', 'B-TITLE'), ('U', 'B-CODE'), ('.', 'I-CODE'), ('S', 'I-CODE'), ('.', 'I-CODE'), ('C', 'I-CODE'), ('.', 'I-CODE'), ('§', 'O'), ('12201', 'B-SECTION'), ('(', 'I-SECTION'), ('c', 'I-SECTION'), (')', 'I-SECTION')]
+
     \n
     Do not assign any labels not in the list above. If a citation is not for
     caselaw or statute, ignore it (assign its tokens 'O'). Ignore legislative
