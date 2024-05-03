@@ -87,7 +87,7 @@ async def do_tags_for_sentence(text: str, tokens: List[str]) -> Datum:
             return Datum.empty()
     try:
         return Datum(text=text, tokens=tokens, tags=tags_map)
-    except Exception as e:
+    except Exception:
         print("A sadge happened!\n")
         print(tags_map)
         return Datum.empty()
@@ -143,9 +143,11 @@ async def process_cl_doc(doc: Dict):
 
         data = await text_to_data(text)
 
+        file_name = f"{RAW_DATA_DIR}/cl_{doc_id}.jsonl"
+
         df = pd.DataFrame([x.dict() for x in data])
         df.to_json(
-            f"{RAW_DATA_DIR}/cl_{doc_id}.jsonl",
+            file_name,
             orient="records",
             lines=True,
         )

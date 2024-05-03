@@ -86,7 +86,7 @@ def download_cl():
 def process_cl_docs():
     docs: Dataset = load_raw_cl_docket_entries_ds()
     print(docs.column_names)
-    subset = docs.select(range(49, 51))
+    subset = docs.select(range(57, 59))
 
     tasks = []
     for d in subset:
@@ -116,12 +116,6 @@ def test_model():
     text = """ sentencing him to 24 months’ imprisonment on one count of possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a) & (b)(1)(C), and 60 """
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
-
-    # print("Tokenized Input:", tokenized_input)
-    # Convert token IDs back to tokens for easier readability
-    # tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
-    # print("Tokens:", tokens)
-
     tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
 
     model.eval()
@@ -131,7 +125,6 @@ def test_model():
         logits = outputs.logits
         predictions = torch.argmax(logits, dim=-1)
 
-    # Print the predicted labels
     predicted_labels = [ALL_LABELS[p] for p in predictions[0].tolist()]
     tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
 
