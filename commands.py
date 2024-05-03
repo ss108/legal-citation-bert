@@ -3,6 +3,7 @@ import asyncio
 import torch
 import typer
 from datasets import Dataset
+from transformers import BertTokenizerFast
 
 from src.data.prepare import (
     create_candidate_dataset,
@@ -22,6 +23,7 @@ from src.training.model import (
     get_base_model,
     get_tokenizer,
     load_model_from_checkpoint,
+    MODEL_NAME,
 )
 from src.training.train import test_predict, train_model
 from src.data.generate import generate_tags
@@ -86,7 +88,7 @@ def download_cl():
 def process_cl_docs():
     docs: Dataset = load_raw_cl_docket_entries_ds()
     print(docs.column_names)
-    subset = docs.select(range(49, 51))
+    subset = docs.select(range(57, 59))
 
     tasks = []
     for d in subset:
@@ -113,15 +115,11 @@ def test_model():
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = """ sentencing him to 24 months’ imprisonment on one count of possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a) & (b)(1)(C), and 60 """
+    text = """ sentencing him to 24 months’ imprisonment on one count of
+           possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a);
+           Fexler v. Hock, 123 U.S. 456, 499 (2021)."""
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
-
-    # print("Tokenized Input:", tokenized_input)
-    # Convert token IDs back to tokens for easier readability
-    # tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
-    # print("Tokens:", tokens)
-
     tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
 
     model.eval()
@@ -131,12 +129,20 @@ def test_model():
         logits = outputs.logits
         predictions = torch.argmax(logits, dim=-1)
 
-    # Print the predicted labels
     predicted_labels = [ALL_LABELS[p] for p in predictions[0].tolist()]
     tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
 
     for token, label in zip(tokens, predicted_labels):
         print(f"{token} - {label}")
+
+
+@app.command()
+def push_to_hub():
+    model = load_model_from_checkpoint()
+    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+
+    tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
+    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
 
 
 @app.command()

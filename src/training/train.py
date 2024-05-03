@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 
 import numpy as np
@@ -8,15 +7,27 @@ from transformers import EarlyStoppingCallback, Trainer, TrainingArguments
 
 from .model import get_base_model
 
+OUTPUT_DIR = Path(__file__).resolve().parent.parent.parent / "training_output"
+
+
+def get_next_version() -> str:
+    version_dirs = [
+        d for d in OUTPUT_DIR.iterdir() if d.is_dir() and d.name.startswith("v")
+    ]
+
+    version_numbers = sorted(
+        [int(d.name[1:]) for d in version_dirs if d.name[1:].isdigit()]
+    )
+
+    next_version_number = version_numbers[-1] + 1 if version_numbers else 1
+
+    next_version_dir = f"v{next_version_number}"
+
+    return next_version_dir
+
 
 def get_output_dir():
-    # Create a unique directory for this training run
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = (
-        Path(__file__).resolve().parent.parent.parent
-        / "training_output"
-        / f"run_{timestamp}"
-    )
+    output_dir = OUTPUT_DIR / get_next_version()
 
     output_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
     return output_dir

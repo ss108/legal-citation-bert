@@ -61,39 +61,26 @@ def get_tokenizer():
     return tokenizer
 
 
-def load_model_from_checkpoint(timestamp: Optional[str] = None):
-    """
-    Load a trained model from the most recent checkpoint or a specified checkpoint directory,
-    with the number of labels it was trained with.
-
-    Args:
-    timestamp (str, optional): Timestamp of the training run to identify the checkpoint directory.
-
-    Returns:
-    model: The loaded pretrained model configured with the correct number of labels.
-    """
+def load_model_from_checkpoint(version: Optional[str] = None):
     training_output_dir = (
         Path(__file__).resolve().parent.parent.parent / "training_output"
     )
 
-    # Ensure the base training output directory exists
     if not training_output_dir.exists():
         raise FileNotFoundError(
             f"Training output directory {training_output_dir} not found."
         )
 
-    # If a timestamp is provided, use it to determine the checkpoint directory
-    if timestamp:
-        checkpoint_dir = training_output_dir / f"run_{timestamp}"
+    if version:
+        checkpoint_dir = training_output_dir / f"v{version}"
         if not checkpoint_dir.exists():
             raise FileNotFoundError(
-                f"No checkpoint directory found for timestamp {timestamp}"
+                f"No checkpoint directory found for version {version}"
             )
 
     else:
-        # If no timestamp is provided, find the most recent checkpoint directory
         checkpoint_dir = max(
-            training_output_dir.glob("run_*"),
+            training_output_dir.glob("v*"),
             key=lambda x: x.stat().st_mtime,
             default=None,
         )
