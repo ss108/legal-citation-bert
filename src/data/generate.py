@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, TypedDict, get_type_hints
 
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Sentence
 from src.openai import chat
+from src.mistral import chat as mistral_chat
 from src.training.model import ALL_LABELS
 
 sentence_schema = get_type_hints(Sentence)
@@ -247,6 +248,10 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     'I-CODE'), ('.', 'I-CODE'), ('12', 'B-SECTION'), ('(', 'I-SECTION'), ('a',
     'I-SECTION'), (')', 'I-SECTION'), ('(', 'I-SECTION'), ('3', 'I-SECTION'),
     (')' 'I-SECTION'),]
+
+    FULL EXAMPLE 6:
+    Text: 'industry. See 42 U.S .C. § 12201(c).'
+    Tags: [('industry', 'O'), ('.', 'O'), ('See', 'O'), ('42', 'B-TITLE'), ('U', 'B-CODE'), ('.', 'I-CODE'), ('S', 'I-CODE'), ('.', 'I-CODE'), ('C', 'I-CODE'), ('.', 'I-CODE'), ('§', 'O'), ('12201', 'B-SECTION'), ('(', 'I-SECTION'), ('c', 'I-SECTION'), (')', 'I-SECTION')]
 
     \n
     Do not assign any labels not in the list above. If a citation is not for

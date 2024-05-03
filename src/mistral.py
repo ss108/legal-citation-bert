@@ -16,7 +16,7 @@ async def chat(
     messages: List[ChatMessage],
     model: str = "mistral-large-latest",
     temperature: float = 0.3,
-) -> Dict:
+) -> str:
     api_key = os.environ["MISTRAL_API_KEY"]
     client = MistralAsyncClient(api_key=api_key)
 

@@ -61,7 +61,7 @@ def train_model(ds_dict: DatasetDict):
     # Define training arguments with adjusted batch sizes and number of epochs
     training_args = TrainingArguments(
         output_dir=str(output_dir),
-        num_train_epochs=50,
+        num_train_epochs=75,
         per_device_train_batch_size=2,
         per_device_eval_batch_size=1,
         warmup_steps=10,
