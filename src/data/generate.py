@@ -117,6 +117,41 @@ async def _generate_short(n: int, type: CIT_TYPE = CIT_TYPE.CASE) -> List[Senten
     return formatted_results
 
 
+async def generate_unofficial_citation(n: int = 1) -> List[Sentence]:
+    PROMPT = f"""
+    GOAL: Generate a snippet from a fictitious legal motion containing a caselaw
+    citation to the Lexis or Westlaw reporter, or with no reporter at all and
+    only a court case number. The sentence will be used to train a NER model.
+
+    The jurisdiction could be Federal or state, appellate or not.
+    \n
+    Example of Lexis: Byuk v. Sung, 2024 Lexis 99873 (S.D.N.Y. Mar. 11, 2024)\n
+    Example of Westlaw: United States v. Westley, 2018 WL 3448161 at *8 (D.
+    Conn. July 17, 2018)\n
+    Example of no reporter: People v. Jones, No. 17-CR-171 (MPS) at *99 (D. Conn. July 11th, 2018)\n
+    OUTPUT in this JSON format: {sentence_schema}
+    """
+    tasks = []
+    for _ in range(n):
+        tasks.append(
+            chat(
+                messages=[], system_prompt=PROMPT, temperature=1.0, model="gpt-4-turbo"
+            )
+        )
+
+    raw_results = await asyncio.gather(*tasks)
+    formatted_results = []
+
+    for r in raw_results:
+        try:
+            sent = json.loads(r)
+            formatted_results.append(sent)
+        except Exception:
+            continue
+
+    return formatted_results
+
+
 class TokenTags(TypedDict):
     tags: List[Tuple[str, str]]
 

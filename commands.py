@@ -26,7 +26,7 @@ from src.training.model import (
     MODEL_NAME,
 )
 from src.training.train import test_predict, train_model
-from src.data.generate import generate_tags
+from src.data.generate import generate_tags, generate_unofficial_citation
 
 app = typer.Typer()
 
@@ -42,6 +42,12 @@ def gen_sentences():
         cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
     )
     asyncio.run(do_sentences(args))  # pyright: ignore
+
+
+@app.command()
+def test_gen():
+    res = asyncio.run(generate_unofficial_citation(2))
+    print(res)
 
 
 @app.command()
@@ -115,9 +121,7 @@ def test_model():
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = """ sentencing him to 24 months’ imprisonment on one count of
-           possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a);
-           Fexler v. Hock, 123 U.S. 456, 499 (2021)."""
+    text = """warrants similar to the one at issue here. (Opp'n at 9-10.) See, e.g., United States v. Westley, No. 17-CR-171 (MPS), 2018 WL 3448161, at *12 (D. Conn. July 17, 2018) (in upholding Facebook warrant, equating Facebook information to other "electronic evidence" and asserting that "extremely broad" disclosure is a "practical necessity when dealing with electronic evidence");"""
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
     tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
