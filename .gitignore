@@ -164,3 +164,5 @@ cython_debug/
 
 training_output/*
 !training_output
+
+*.pdf
