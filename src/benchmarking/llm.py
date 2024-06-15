@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, List
 
+import tiktoken
 from pydantic import BaseModel
 
 from src.openai import chat
@@ -90,11 +91,45 @@ Input Object: {current}
 """
 
 
-async def extract_citations(text: str) -> IterativeCitExtraction:
+def count_tokens(s: str) -> int:
+    enc = tiktoken.encoding_for_model("gpt-4-turbo")
+    token_ids = enc.encode(s)
+    return len(token_ids)
+
+
+def chunk_by_token(text: str, max_tokens=4000) -> List[str]:
+    enc = tiktoken.encoding_for_model("gpt-4-turbo")
+    token_ids = enc.encode(text)
+
+    all_chunks = [
+        token_ids[i : i + max_tokens] for i in range(0, len(token_ids), max_tokens)
+    ]
+
+    return [enc.decode(chunk) for chunk in all_chunks]
+
+
+async def extract_citations_from_document(doc: str) -> IterativeCitExtraction:
+    chunks = chunk_by_token(doc)
+    return await extract_citations_from_chunks(chunks)
+
+
+async def _extract_citations_from_chunk(
+    text: str, previous_result: Dict = dict()
+) -> IterativeCitExtraction:
     res = await chat(
         system_prompt=LLM_EXTRACTION_PROMPT.format(
-            current="{}", schema=IterativeCitExtraction.model_json_schema()
+            current=str(previous_result),
+            schema=IterativeCitExtraction.model_json_schema(),
         ),
         messages=[{"role": "user", "content": f"Input Text: {text}"}],
     )
     return IterativeCitExtraction.model_validate_json(res)
+
+
+async def extract_citations_from_chunks(chunks: List[str]) -> IterativeCitExtraction:
+    count = IterativeCitExtraction(cases={}, statutes={})
+
+    for c in chunks:
+        count = await _extract_citations_from_chunk(c, count.dict())
+
+    return count
