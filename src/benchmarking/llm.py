@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Dict, List
 
 import tiktoken
@@ -90,6 +91,20 @@ Input Object: {current}
 
 """
 
+FORMAT_PROMPT = """
+Given a JSON object representing American caselaw legal citations extracted from a document and their
+counts, return JSON where the keys are the volume-reporter-page number
+identifiers of the cases and the values are the respective count.
+
+(Put differently, replace the full citations with just the volume-reporter-page
+number identifiers.)
+
+EXAMPLE: {{'cases': {{'N. Star Int'l v. Ariz. Corp. Comm'n, 720 F.2d 578 (9th
+Cir. 1983)': 1, {{'Some Other v. Case, 725 F.Supp 800 (9th Cir. 1983)': 3}}}}
+
+OUTPUT: {{'720 F.2d 578': 1, '725 F.Supp 800': 3}}
+"""
+
 
 def count_tokens(s: str) -> int:
     enc = tiktoken.encoding_for_model("gpt-4-turbo")
@@ -110,7 +125,18 @@ def chunk_by_token(text: str, max_tokens=4000) -> List[str]:
 
 async def extract_citations_from_document(doc: str) -> IterativeCitExtraction:
     chunks = chunk_by_token(doc)
-    return await extract_citations_from_chunks(chunks)
+    full_count: IterativeCitExtraction = await extract_citations_from_chunks(chunks)
+
+    cases = full_count.cases
+
+    if len(cases) > 0:
+        reformatted = await chat(
+            system_prompt=FORMAT_PROMPT,
+            messages=[{"role": "user", "content": str(cases)}],
+        )
+        full_count.cases = json.loads(reformatted)
+
+    return full_count
 
 
 async def _extract_citations_from_chunk(
