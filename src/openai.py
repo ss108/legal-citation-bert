@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import openai
 import tiktoken
@@ -20,7 +20,7 @@ async def chat(
     model: str = "gpt-4-turbo",
     temperature: float = 1.0,
 ) -> str:
-    client = openai.AsyncClient()
+    client = openai.AsyncOpenAI()
     system_message = {"role": "system", "content": system_prompt}
 
     resp = await client.chat.completions.create(
