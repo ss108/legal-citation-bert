@@ -1,10 +1,11 @@
-from .types import CitationExtractionFormat
+from .llm import IterativeCitExtraction
+from .types import CitationExtractionResult
 
 
-async def score_llm(
-    text: str,
-    correct: CitationExtractionFormat,
-    llm_extraction: CitationExtractionFormat,
+def llm_err_count(
+    *,
+    correct: CitationExtractionResult,
+    llm_extraction: IterativeCitExtraction,
 ) -> int:
     error_count = 0
 

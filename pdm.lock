@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:afc3544e543d223488a3da0d7bca9a3b750481b2acd967cb486be16de53f50f5"
+content_hash = "sha256:d551944329f9d8fa1d1b8e1cd7cf1fa16161aeda134e541768990fa4e9111ec2"
 
 [[package]]
 name = "accelerate"
@@ -108,6 +108,17 @@ groups = ["default"]
 files = [
     {file = "attrs-23.2.0-py3-none-any.whl", hash = "sha256:99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1"},
     {file = "attrs-23.2.0.tar.gz", hash = "sha256:935dc3b529c262f6cf76e50877d35a4bd3c1de194fd41f47a2b7ae8f19971f30"},
+]
+
+[[package]]
+name = "beartype"
+version = "0.18.5"
+requires_python = ">=3.8.0"
+summary = "Unbearably fast runtime type checking in pure Python."
+groups = ["default"]
+files = [
+    {file = "beartype-0.18.5-py3-none-any.whl", hash = "sha256:5301a14f2a9a5540fe47ec6d34d758e9cd8331d36c4760fc7a5499ab86310089"},
+    {file = "beartype-0.18.5.tar.gz", hash = "sha256:264ddc2f1da9ec94ff639141fbe33d22e12a9f75aa863b83b7046ffff1381927"},
 ]
 
 [[package]]
@@ -1256,6 +1267,41 @@ groups = ["default"]
 files = [
     {file = "pygments-2.17.2-py3-none-any.whl", hash = "sha256:b27c2826c47d0f3219f29554824c30c5e8945175d888647acd804ddd04af846c"},
     {file = "pygments-2.17.2.tar.gz", hash = "sha256:da46cec9fd2de5be3a8a784f434e4c4ab670b4ff54d605c4c2717e9d49c4c367"},
+]
+
+[[package]]
+name = "pymupdf"
+version = "1.24.5"
+requires_python = ">=3.8"
+summary = "A high performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents."
+groups = ["default"]
+dependencies = [
+    "PyMuPDFb==1.24.3",
+]
+files = [
+    {file = "PyMuPDF-1.24.5-cp311-none-macosx_10_9_x86_64.whl", hash = "sha256:eb145b5372b6faf6a4ec86dee51c12a55bd30c0c9df04fc1146d61710726cd08"},
+    {file = "PyMuPDF-1.24.5-cp311-none-macosx_11_0_arm64.whl", hash = "sha256:131cf58e9932c84b0d367621cd580301a0d5d67590ce97a4d484b5c6c12bc8a5"},
+    {file = "PyMuPDF-1.24.5-cp311-none-manylinux2014_aarch64.whl", hash = "sha256:318befef651f1b98c6de4980d725970c93eddd3f183fa0bf5e47decfbed918a9"},
+    {file = "PyMuPDF-1.24.5-cp311-none-manylinux2014_x86_64.whl", hash = "sha256:4634f3e89aec71686b56c6db0e5932314d5c220ba452bf82b00650ff3bbed662"},
+    {file = "PyMuPDF-1.24.5-cp311-none-win32.whl", hash = "sha256:dfe44284e1c753376d111f3edf8c11f7daca96c72fe65f97d41ed71704a640e1"},
+    {file = "PyMuPDF-1.24.5-cp311-none-win_amd64.whl", hash = "sha256:8b2b1b08ce5b36168c625ed2a3621a6fd56e77f433a68ab8cd0445b616a59ec6"},
+    {file = "PyMuPDF-1.24.5.tar.gz", hash = "sha256:968d30ab20be828aab56bb04621bbb9f962c59ab5f1788236473c372fe797093"},
+]
+
+[[package]]
+name = "pymupdfb"
+version = "1.24.3"
+requires_python = ">=3.8"
+summary = "MuPDF shared libraries for PyMuPDF."
+groups = ["default"]
+files = [
+    {file = "PyMuPDFb-1.24.3-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:d2ccca660042896d4af479f979ec10674c5a0b3cd2d9ecb0011f08dc82380cce"},
+    {file = "PyMuPDFb-1.24.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:ad51d21086a16199684a3eebcb47d9c8460fc27e7bebae77f5fe64e8c34ebf34"},
+    {file = "PyMuPDFb-1.24.3-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:3e7aab000d707c40e3254cd60152897b90952ed9a3567584d70974292f4912ce"},
+    {file = "PyMuPDFb-1.24.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:f39588fd2b7a63e2456df42cd8925c316202e0eb77d115d9c01ba032b2c9086f"},
+    {file = "PyMuPDFb-1.24.3-py3-none-win32.whl", hash = "sha256:0d606a10cb828cefc9f864bf67bc9d46e8007af55e643f022b59d378af4151a8"},
+    {file = "PyMuPDFb-1.24.3-py3-none-win_amd64.whl", hash = "sha256:e88289bd4b4afe5966a028774b302f37d4b51dad5c5e6720dd04524910db6c6e"},
+    {file = "PyMuPDFb-1.24.3.tar.gz", hash = "sha256:7cc5da3031d160e0f01dbb88567ddca70adc82f062a3a5b4e2dd2a57646f442c"},
 ]
 
 [[package]]

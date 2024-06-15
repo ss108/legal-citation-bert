@@ -1,19 +1,92 @@
 import asyncio
+import glob
+import importlib.util
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict
+
+import fitz
+from beartype import beartype
 
 from src.benchmarking.llm import extract_citations_from_document
+from src.benchmarking.scoring import llm_err_count
+from src.benchmarking.types import CitationExtractionResult
 
-test_text1 = """This brief is concerned with the language and
-interpretation of what we call the rescission
-condition in 8 U.S.C. § 1229a(b)(5)(C)(ii), under
-which an order of removal entered in absentia “may be
-rescinded. YOP v. Qoo, 37 U.S. 99 (2009)”"""
+TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
 
-test_text2 = """
-YEHEYHEYEH. 8 U.S.C. § 1229a(b)(5)(C)(ii) son born and raised. See also. Yop, 37
-U.S. at 101.
-"""
 
-res = asyncio.run(extract_citations_from_document("\n".join([test_text1, test_text2])))
+@beartype
+@dataclass(frozen=True)
+class TestFile:
+    file_text: str
+    correct: CitationExtractionResult
 
-print(res)
-# assert res.statutes["8 U.S.C. § 1229a(b)(5)(C)(ii)"] == 2
+
+def load_module_from_file(file_path: str):
+    module_name = Path(file_path).stem  # Use the file name as the module name
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+    return None
+
+
+def get_test_data():
+    test_files_dir = Path(TEST_FILES_DIR).resolve()
+
+    test_data: Dict[str, TestFile] = {}
+
+    for subdir, dirs, files in os.walk(test_files_dir):
+        print(f"Processing directory: {subdir}")
+
+        # Check for correct.py and text.pdf in the current directory
+        correct_files = glob.glob(os.path.join(subdir, "correct.py"))
+        text_files = glob.glob(os.path.join(subdir, "text.pdf"))
+
+        print("Correct files:", correct_files)
+        print("Text files:", text_files)
+
+        if correct_files and text_files:
+            assert (
+                len(correct_files) == 1
+            ), "There must be exactly one correct.py file per test case"
+            assert (
+                len(text_files) == 1
+            ), "There must be exactly one text.pdf file per test case"
+
+            correct_file = correct_files[0]
+            text_file = text_files[0]
+
+            # Example for loading correct.py (Assume it defines a variable 'correct')
+            module = load_module_from_file(correct_file)
+            correct = getattr(module, "correct", None)
+            assert isinstance(
+                correct, CitationExtractionResult
+            ), "correct.py must define a variable 'correct' of type CitationExtractionResult"
+
+            page_text = []
+            with fitz.open(text_file) as doc:
+                for page in doc:
+                    page_text.append(page.get_text())  # pyright: ignore
+
+            folder_name = Path(subdir).name
+            test_data[folder_name] = TestFile(
+                file_text="\n".join(page_text), correct=correct
+            )
+
+        else:
+            print(f"Skipping directory {subdir} as it lacks the required files.")
+
+    return test_data
+
+
+td = get_test_data()
+
+for file_name, data in td.items():
+    res = asyncio.run(extract_citations_from_document(data.file_text))
+    llm_score = llm_err_count(correct=data.correct, llm_extraction=res)
+    print(f"File: {file_name}, LLM Score: {llm_score}")
