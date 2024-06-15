@@ -88,5 +88,5 @@ td = get_test_data()
 
 for file_name, data in td.items():
     res = asyncio.run(extract_citations_from_document(data.file_text))
-    llm_score = llm_err_count(correct=data.correct, llm_extraction=res)
-    print(f"File: {file_name}, LLM Score: {llm_score}")
+    llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
+    print(f"File: {file_name}, LLM Error Count: {llm_errs}")
