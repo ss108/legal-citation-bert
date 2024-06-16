@@ -1,4 +1,3 @@
-import asyncio
 import glob
 import importlib.util
 import os
@@ -10,8 +9,7 @@ from typing import Dict
 import fitz
 from beartype import beartype
 
-from src.benchmarking.llm import extract_citations_from_document
-from src.benchmarking.scoring import llm_err_count
+from src.benchmarking.model import get_labels, split_text
 from src.benchmarking.types import CitationExtractionResult
 
 TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
@@ -25,7 +23,7 @@ class TestFile:
 
 
 def load_module_from_file(file_path: str):
-    module_name = Path(file_path).stem  # Use the file name as the module name
+    module_name = Path(file_path).stem
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     if spec and spec.loader:
         module = importlib.util.module_from_spec(spec)
@@ -84,9 +82,16 @@ def get_test_data():
     return test_data
 
 
-td = get_test_data()
+# td = get_test_data()
 
-for file_name, data in td.items():
-    res = asyncio.run(extract_citations_from_document(data.file_text))
-    llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
-    print(f"File: {file_name}, LLM Error Count: {llm_errs}")
+# for file_name, data in td.items():
+#     res = asyncio.run(extract_citations_from_document(data.file_text))
+#     print(res)
+#     llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
+#     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
+
+chunks = split_text("This is a test sentence. This is like a flashback, a drim.")
+print(chunks[0])
+predictions = get_labels(chunks[0])
+
+print(predictions)
