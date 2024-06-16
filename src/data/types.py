@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Iterable, List, Literal, Optional, Tuple, TypeAlias, TypedDict
+from typing import List, Literal, Tuple, TypeAlias, TypedDict
 
 from pydantic import BaseModel
 
@@ -8,15 +8,6 @@ STATEMENT_TYPE: TypeAlias = Literal["fact", "law"]
 
 class Sentence(TypedDict):
     text: str
-
-
-# class RawData(TypedDict):
-#     text: str
-#     tokens: Optional[List[str]]
-#     tags_map: Optional[List[str]]
-
-# class RawData(BaseModel):
-#     text: str
 
 
 class Datum(BaseModel):

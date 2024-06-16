@@ -90,8 +90,5 @@ def get_test_data():
 #     llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
 #     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
-chunks = split_text("This is a test sentence. This is like a flashback, a drim.")
-print(chunks[0])
+chunks = split_text("as amended, 8 U. S. C. §1101 is better")
 predictions = get_labels(chunks[0])
-
-print(predictions)
