@@ -15,6 +15,9 @@ class LabelPrediction(NamedTuple):
     token: str
     label: str
 
+    def __repr__(self):
+        return f"{self.token}: {self.label}"
+
 
 class ICitation(Protocol):
     @classmethod
