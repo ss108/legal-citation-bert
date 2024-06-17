@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import spacy
 import torch
-from transformers import PreTrainedTokenizerFast
+from transformers import AutoModelForTokenClassification, PreTrainedTokenizerFast
 
 from src.training.model import (
     ALL_LABELS,
@@ -10,12 +10,14 @@ from src.training.model import (
     load_model_from_checkpoint,
 )
 
+from .temp_aggregation import LabelPrediction
+
 DEVICE = torch.device("cuda")
 
 
 def get_model():
     model = load_model_from_checkpoint()
-    model = model.to(DEVICE)
+    model = model.to(DEVICE)  # pyright: ignore
     return model
 
 
@@ -39,9 +41,10 @@ def split_text(text: str) -> List[str]:
     return sentences
 
 
-def get_labels(text: str) -> List[str]:
+def get_labels(
+    text: str, model: AutoModelForTokenClassification
+) -> List[LabelPrediction]:
     tokenizer: PreTrainedTokenizerFast = get_tokenizer()
-    model = get_model()
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)  # pyright: ignore
     tokenized_input: Dict[str, torch.Tensor] = {
@@ -51,7 +54,7 @@ def get_labels(text: str) -> List[str]:
     model.eval()  # pyright: ignore
 
     with torch.no_grad():
-        outputs = model(**tokenized_input)
+        outputs = model(**tokenized_input)  # pyright: ignore
         logits = outputs.logits
         predictions = torch.argmax(logits, dim=-1)
 
@@ -59,6 +62,8 @@ def get_labels(text: str) -> List[str]:
 
     tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])  # pyright: ignore
 
+    res = []
     for token, label in zip(tokens, predicted_labels):
-        print(f"{token} - {label}")
-    return predicted_labels
+        res.append(LabelPrediction(token=token, label=label))
+
+    return res

@@ -4,14 +4,36 @@ Goal is to put this logic in a separate library.
 Thus, the schema is subject to dramatic change.
 """
 
-from typing import List, Optional, Tuple, TypeAlias
+from typing import List, NamedTuple, Optional, Protocol, Tuple, Type, TypeAlias
 
 from pydantic import BaseModel
 
 PIN_CITE: TypeAlias = Tuple[int, Optional[int]]
 
 
-def citation_from(token_label_pairs: List[Tuple[str, str]]): ...
+class LabelPrediction(NamedTuple):
+    token: str
+    label: str
+
+
+class ICitation(Protocol):
+    @classmethod
+    def from_token_label_pairs(cls, token_label_pairs: List[LabelPrediction]): ...
+
+    @property
+    def full_text(self) -> str: ...
+
+
+def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitation]:
+    labels_only = [pair.label for pair in token_label_pairs]
+
+    citation_class: Optional[Type[ICitation]] = None
+
+    match labels_only:
+        case ["B-TITLE", *rest]:
+            ...
+        case ["B-CASE_NAME", _]:
+            ...
 
 
 class CaselawCitation(BaseModel):
@@ -43,7 +65,31 @@ class CaselawCitation(BaseModel):
 
     @property
     def full_text(self) -> str:
-        components = [self.case_name, ","]
+        components = [f"{self.case_name},", self.volume, self.reporter]
+
+        if self.starting_page:
+            components.append(self.starting_page)
+
+        if self.pin_cite:
+            s, e = self.pin_cite
+            components.append(f", {s}")
+
+            if e:
+                components.append(
+                    f"-{e}"
+                )  # TODO: ensure this is the right type of dash
+
+        paren_block = ""
+        if self.court and self.year:
+            paren_block = f"({self.court} {self.year})"
+        elif self.court and self.year is None:
+            paren_block = f"({self.court})"
+        elif self.court is None and self.year:
+            paren_block = f"({self.year})"
+
+        components.append(paren_block)
+
+        return " ".join(components)
 
 
 class StatuteCitation(BaseModel):

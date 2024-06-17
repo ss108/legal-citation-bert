@@ -66,7 +66,9 @@ def get_tokenizer() -> PreTrainedTokenizerFast:
     return tokenizer
 
 
-def load_model_from_checkpoint(version: Optional[str] = None):
+def load_model_from_checkpoint(
+    version: Optional[str] = None,
+) -> AutoModelForTokenClassification:
     training_output_dir = (
         Path(__file__).resolve().parent.parent.parent / "training_output"
     )
