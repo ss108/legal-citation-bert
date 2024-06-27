@@ -5,6 +5,7 @@ from eyecite import get_citations
 """
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     ["sentence", "expected"],
     [

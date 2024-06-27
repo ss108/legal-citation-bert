@@ -5,6 +5,7 @@ import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
 
+from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
     delete_from_cache,
@@ -20,13 +21,12 @@ from src.data.prepare import (
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
 from src.training.model import (
     ALL_LABELS,
+    MODEL_NAME,
     get_base_model,
     get_tokenizer,
     load_model_from_checkpoint,
-    MODEL_NAME,
 )
 from src.training.train import test_predict, train_model
-from src.data.generate import generate_tags, generate_unofficial_citation
 
 app = typer.Typer()
 
@@ -117,7 +117,7 @@ def test_mistral_labeling():
 def test_model():
     device = torch.device("cuda")
     model = load_model_from_checkpoint()
-    model = model.to(device)
+    model = model.to(device)  # pyright: ignore
     # print(model)
 
     tokenizer = get_tokenizer()

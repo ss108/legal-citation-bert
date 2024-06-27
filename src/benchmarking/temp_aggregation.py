@@ -4,6 +4,8 @@ Goal is to put this logic in a separate library.
 Thus, the schema is subject to dramatic change.
 """
 
+from __future__ import annotations
+
 from typing import List, NamedTuple, Optional, Protocol, Tuple, Type, TypeAlias
 
 from pydantic import BaseModel
@@ -21,7 +23,9 @@ class LabelPrediction(NamedTuple):
 
 class ICitation(Protocol):
     @classmethod
-    def from_token_label_pairs(cls, token_label_pairs: List[LabelPrediction]): ...
+    def from_token_label_pairs(
+        cls, token_label_pairs: List[LabelPrediction]
+    ) -> Optional[ICitation]: ...
 
     @property
     def full_text(self) -> str: ...
@@ -35,8 +39,11 @@ def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitatio
     match labels_only:
         case ["B-TITLE", *rest]:
             ...
-        case ["B-CASE_NAME", _]:
-            ...
+            # citation_class = StatuteCitation
+        case ["B-CASE_NAME", *rest]:
+            citation_class = CaselawCitation
+        case _:
+            return None
 
 
 class CaselawCitation(BaseModel):
@@ -94,6 +101,51 @@ class CaselawCitation(BaseModel):
 
         return " ".join(components)
 
+    @classmethod
+    def from_token_label_pairs(
+        cls, token_label_pairs: List[LabelPrediction]
+    ) -> Optional[CaselawCitation]:
+        case_name = ""
+        volume = None
+        reporter = ""
+        starting_page = None
+        pin_cite = None
+        court = None
+        year = None
+
+        for pair in token_label_pairs:
+            token, label = pair
+
+            if label == "B-CASE_NAME":
+                case_name += token + " "
+            elif label == "B-VOLUME":
+                volume = int(token)
+            elif label == "B-REPORTER":
+                reporter = token
+            elif label == "B-PAGE":
+                starting_page = int(token)
+            elif label == "B-PIN":
+                pin_cite = (int(token), None)
+            elif label == "I-PIN":
+                pin_cite = (pin_cite[0], int(token))
+            elif label == "B-COURT":
+                court = token
+            elif label == "B-YEAR":
+                year = int(token)
+
+        if volume is None:
+            return None
+
+        return cls(
+            case_name=case_name.strip(),
+            volume=volume,
+            reporter=reporter,
+            starting_page=starting_page,
+            pin_cite=pin_cite,
+            court=court,
+            year=year,
+        )
+
 
 class StatuteCitation(BaseModel):
     title: Optional[str]
@@ -116,3 +168,38 @@ class StatuteCitation(BaseModel):
             components.append(self.section)
 
         return " ".join(components)
+
+
+def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
+    """
+    Aggregates entities that are split into multiple tokens.
+    """
+    aggregated: List[LabelPrediction] = []
+
+    current_entity = ""
+    current_label = ""
+
+    for token, label in labels:
+        if label.startswith("B-"):
+            if current_entity:
+                aggregated.append(
+                    LabelPrediction(token=current_entity, label=current_label)
+                )
+
+            current_entity = token
+            current_label = label
+        elif label.startswith("I-"):
+            current_entity += token
+        elif label.startswith("O"):
+            if current_entity:
+                aggregated.append(
+                    LabelPrediction(token=current_entity, label=current_label)
+                )
+
+            current_entity = ""
+            current_label = ""
+
+    if current_entity:
+        aggregated.append(LabelPrediction(token=current_entity, label=current_label))
+
+    return aggregated

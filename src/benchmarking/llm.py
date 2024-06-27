@@ -96,8 +96,7 @@ Given a JSON object representing American caselaw legal citations extracted from
 counts, return JSON where the keys are the volume-reporter-page number
 identifiers of the cases and the values are the respective count.
 
-(Put differently, replace the full citations with just the volume-reporter-page
-number identifiers.)
+(Put differently, replace the full citations with just the volume-reporter-page number identifiers.)
 
 EXAMPLE: {{'cases': {{'N. Star Int'l v. Ariz. Corp. Comm'n, 720 F.2d 578 (9th
 Cir. 1983)': 1, {{'Some Other v. Case, 725 F.Supp 800 (9th Cir. 1983)': 3}}}}
