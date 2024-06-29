@@ -90,7 +90,9 @@ def get_test_data():
 #     llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
 #     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
-chunks = split_text("May I interest you in a short citation--Fux, 76 F.3d at 89.")
+chunks = split_text(
+    "longstanding but “flawed” decisions. See, e.g., Leegin Creative Leather Products, Inc. v. PSKS, Inc., 551 U. S. 877, 904, 907 (2007)."
+)
 model = get_model()
 
 for c in chunks:

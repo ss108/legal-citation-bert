@@ -20,6 +20,12 @@ class LabelPrediction(NamedTuple):
     def __repr__(self):
         return f"{self.token}: {self.label}"
 
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, LabelPrediction):
+            return False
+
+        return self.token == value.token and self.label == value.label
+
 
 class ICitation(Protocol):
     @classmethod
@@ -40,10 +46,15 @@ def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitatio
         case ["B-TITLE", *rest]:
             ...
             # citation_class = StatuteCitation
-        case ["B-CASE_NAME", *rest]:
+        case ["B-CASE_NAME", *rest]:  # noqa
             citation_class = CaselawCitation
         case _:
             return None
+
+    if not citation_class:
+        return None
+
+    citation_class.from_token_label_pairs(token_label_pairs)
 
 
 class CaselawCitation(BaseModel):
@@ -196,6 +207,9 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     current_label = ""
 
     for token, label in labels:
+        if token[0].isupper() and len(current_entity) > 0 and "CASE_NAME" in label:
+            token = f" {token}"
+
         if label.startswith("B-"):
             if current_entity:
                 aggregated.append(

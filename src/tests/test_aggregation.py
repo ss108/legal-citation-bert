@@ -84,3 +84,35 @@ from src.benchmarking.temp_aggregation import LabelPrediction, aggregate_entitie
 def test_agg_short_cite(labels: List[LabelPrediction], expected: List[LabelPrediction]):
     res = aggregate_entities(labels)
     assert res == expected
+
+
+@pytest.mark.parametrize(
+    ["labels", "expected"],
+    [
+        (
+            [
+                LabelPrediction(token="Lee", label="B-CASE_NAME"),
+                LabelPrediction(token="##gin", label="I-CASE_NAME"),
+            ],
+            [LabelPrediction(token="Leegin", label="CASE_NAME")],
+        ),
+        (
+            [
+                LabelPrediction(token="Lee", label="B-CASE_NAME"),
+                LabelPrediction(token="##gin", label="I-CASE_NAME"),
+                LabelPrediction(token="Creative", label="I-CASE_NAME"),
+                LabelPrediction(token="Lea", label="I-CASE_NAME"),
+                LabelPrediction(token="##ther", label="I-CASE_NAME"),
+                LabelPrediction(token="Products", label="I-CASE_NAME"),
+            ],
+            [
+                LabelPrediction(
+                    token="Leegin Creative Leather Products", label="CASE_NAME"
+                )
+            ],
+        ),
+    ],
+)
+def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPrediction]):
+    res = aggregate_entities(labels)
+    assert res == expected
