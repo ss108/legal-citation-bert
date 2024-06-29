@@ -91,7 +91,7 @@ def get_test_data():
 #     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
 chunks = split_text(
-    "longstanding but “flawed” decisions. See, e.g., Leegin Creative Leather Products, Inc. v. PSKS, Inc., 551 U. S. 877, 904, 907 (2007)."
+    "look at this pin cite: Leegin Creative Leather Products, Inc. v. PSKS, 551 U. S. 877, 904-907 (2007)."
 )
 model = get_model()
 

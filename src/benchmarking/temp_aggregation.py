@@ -63,7 +63,7 @@ class CaselawCitation(BaseModel):
     reporter: str
 
     starting_page: Optional[int]
-    pin_cite: Optional[PIN_CITE]
+    raw_pin_cite: Optional[str] = None
 
     court: Optional[str]
     year: Optional[int]
@@ -83,6 +83,17 @@ class CaselawCitation(BaseModel):
     def defendant(self) -> str:
         case_name_components = self.case_name.split(" v. ")
         return case_name_components[1]
+
+    @property
+    def pin_cite(self) -> Optional[PIN_CITE]:
+        if self.raw_pin_cite is None:
+            return None
+
+        if "-" in self.raw_pin_cite:
+            start, end = self.raw_pin_cite.split("-")
+            return int(start), int(end)
+
+        return int(self.raw_pin_cite), None
 
     @property
     def full_text(self) -> str:
@@ -120,7 +131,7 @@ class CaselawCitation(BaseModel):
         volume = None
         reporter = ""
         starting_page = None
-        pin_cite = None
+        raw_pin_cite = None
         court = None
         year = None
 
@@ -136,9 +147,10 @@ class CaselawCitation(BaseModel):
             elif label == "B-PAGE":
                 starting_page = int(token)
             elif label == "B-PIN":
-                pin_cite = (int(token), None)
+                raw_pin_cite = token
             elif label == "I-PIN":
-                pin_cite = (pin_cite[0], int(token))
+                assert raw_pin_cite is not None, "Encountered I-PIN without B-PIN"
+                raw_pin_cite += _process_token(token)
             elif label == "B-COURT":
                 court = token
             elif label == "B-YEAR":
@@ -152,7 +164,7 @@ class CaselawCitation(BaseModel):
             volume=volume,
             reporter=reporter,
             starting_page=starting_page,
-            pin_cite=pin_cite,
+            raw_pin_cite=raw_pin_cite,
             court=court,
             year=year,
         )

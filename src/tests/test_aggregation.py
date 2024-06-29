@@ -111,6 +111,45 @@ def test_agg_short_cite(labels: List[LabelPrediction], expected: List[LabelPredi
                 )
             ],
         ),
+        (
+            [
+                LabelPrediction(token="Lee", label="B-CASE_NAME"),
+                LabelPrediction(token="##gin", label="I-CASE_NAME"),
+                LabelPrediction(token="Creative", label="I-CASE_NAME"),
+                LabelPrediction(token="Lea", label="I-CASE_NAME"),
+                LabelPrediction(token="##ther", label="I-CASE_NAME"),
+                LabelPrediction(token="Products", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="I-CASE_NAME"),
+            ],
+            [
+                LabelPrediction(
+                    token="Leegin Creative Leather Products,", label="CASE_NAME"
+                )
+            ],
+        ),
+        # (
+        #     [
+        #         LabelPrediction(token="Lee", label="B-CASE_NAME"),
+        #         LabelPrediction(token="##gin", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Creative", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Lea", label="I-CASE_NAME"),
+        #         LabelPrediction(token="##ther", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Products", label="I-CASE_NAME"),
+        #         LabelPrediction(token=",", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Inc", label="I-CASE_NAME"),
+        #         LabelPrediction(token=".", label="I-CASE_NAME"),
+        #         LabelPrediction(token="v", label="I-CASE_NAME"),
+        #         LabelPrediction(token=".", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Some", label="I-CASE_NAME"),
+        #         LabelPrediction(token="Guy", label="I-CASE_NAME"),
+        #     ],
+        #     [
+        #         LabelPrediction(
+        #             token="Leegin Creative Leather Products, Inc. v. Some Guy",
+        #             label="CASE_NAME",
+        #         )
+        #     ],
+        # ),
     ],
 )
 def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPrediction]):
