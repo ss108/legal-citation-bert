@@ -170,6 +170,22 @@ class StatuteCitation(BaseModel):
         return " ".join(components)
 
 
+def _process_label(label: str) -> str:
+    if label.startswith("B-"):
+        return label[2:]
+    elif label.startswith("I-"):
+        return label[2:]
+    else:
+        raise ValueError(f"Unexpected label: {label}")
+
+
+def _process_token(token: str) -> str:
+    if token.startswith("##"):
+        return token[2:]
+
+    return token
+
+
 def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     """
     Aggregates entities that are split into multiple tokens.
@@ -187,9 +203,9 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
                 )
 
             current_entity = token
-            current_label = label
+            current_label = _process_label(label)
         elif label.startswith("I-"):
-            current_entity += token
+            current_entity += _process_token(token)
         elif label.startswith("O"):
             if current_entity:
                 aggregated.append(
