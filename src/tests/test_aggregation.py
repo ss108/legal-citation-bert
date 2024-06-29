@@ -58,6 +58,27 @@ from src.benchmarking.temp_aggregation import LabelPrediction, aggregate_entitie
                 LabelPrediction(token="F.3d", label="REPORTER"),
             ],
         ),
+        (
+            [
+                LabelPrediction(token="h", label="B-CASE_NAME"),
+                LabelPrediction(token="e", label="I-CASE_NAME"),
+                LabelPrediction(token="h", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="87", label="B-VOLUME"),
+                LabelPrediction(token="F", label="B-REPORTER"),
+                LabelPrediction(token=".", label="I-REPORTER"),
+                LabelPrediction(token="3", label="I-REPORTER"),
+                LabelPrediction(token="##d", label="I-REPORTER"),
+                LabelPrediction(token="at", label="O"),
+                LabelPrediction(token="99", label="B-PIN"),
+            ],
+            [
+                LabelPrediction(token="heh", label="CASE_NAME"),
+                LabelPrediction(token="87", label="VOLUME"),
+                LabelPrediction(token="F.3d", label="REPORTER"),
+                LabelPrediction(token="99", label="PIN"),
+            ],
+        ),
     ],
 )
 def test_agg_short_cite(labels: List[LabelPrediction], expected: List[LabelPrediction]):
