@@ -154,6 +154,16 @@ def test_agg_short_cite(labels: List[LabelPrediction], expected: List[LabelPredi
         #         )
         #     ],
         # ),
+        (
+            [
+                LabelPrediction(token="10", label="B-PIN"),
+                LabelPrediction(token="##1", label="I-PIN"),
+                LabelPrediction(token="-", label="I-PIN"),
+                LabelPrediction(token="10", label="I-PIN"),
+                LabelPrediction(token="##8", label="I-PIN"),
+            ],
+            [LabelPrediction(token="101-108", label="PIN")],
+        ),
     ],
 )
 def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPrediction]):
@@ -171,6 +181,16 @@ def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPredic
                 LabelPrediction(token="U.S.", label="REPORTER"),
             ],
             "551 U.S.",
+        ),
+        (
+            [
+                LabelPrediction(token="Foo v. Bar", label="CASE_NAME"),
+                LabelPrediction(token="551", label="VOLUME"),
+                LabelPrediction(token="U.S.", label="REPORTER"),
+                LabelPrediction(token="877", label="PAGE"),
+                LabelPrediction(token="904-907", label="PIN"),
+            ],
+            "551 U.S. 877",
         ),
     ],
 )
