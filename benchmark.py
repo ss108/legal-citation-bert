@@ -90,9 +90,7 @@ def get_test_data():
 #     llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
 #     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
-chunks = split_text(
-    "look at this pin cite: Leegin Creative Leather Products, Inc. v. PSKS, 551 U. S. 877, 904-907 (2007)."
-)
+chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
 model = get_model()
 
 for c in chunks:

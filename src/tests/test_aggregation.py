@@ -2,7 +2,11 @@ from typing import List
 
 import pytest
 
-from src.benchmarking.temp_aggregation import LabelPrediction, aggregate_entities
+from src.benchmarking.temp_aggregation import (
+    CaselawCitation,
+    LabelPrediction,
+    aggregate_entities,
+)
 
 
 @pytest.mark.parametrize(
@@ -155,3 +159,23 @@ def test_agg_short_cite(labels: List[LabelPrediction], expected: List[LabelPredi
 def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPrediction]):
     res = aggregate_entities(labels)
     assert res == expected
+
+
+@pytest.mark.parametrize(
+    ["labels", "expected"],
+    [
+        (
+            [
+                LabelPrediction(token="Foo v. Bar", label="CASE_NAME"),
+                LabelPrediction(token="551", label="VOLUME"),
+                LabelPrediction(token="U.S.", label="REPORTER"),
+            ],
+            "551 U.S.",
+        ),
+    ],
+)
+def test_full_cite_guid(labels: List[LabelPrediction], expected: str):
+    cit = CaselawCitation.from_token_label_pairs(labels)
+
+    assert cit, "Citation should not be None"
+    assert cit.guid == expected

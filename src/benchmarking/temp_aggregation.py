@@ -96,6 +96,14 @@ class CaselawCitation(BaseModel):
         return int(self.raw_pin_cite), None
 
     @property
+    def guid(self) -> str:
+        base = f"{self.volume} {self.reporter}"
+        if self.starting_page:
+            base += f" {self.starting_page}"
+
+        return base
+
+    @property
     def full_text(self) -> str:
         components = [f"{self.case_name},", self.volume, self.reporter]
 
@@ -135,25 +143,23 @@ class CaselawCitation(BaseModel):
         court = None
         year = None
 
-        for pair in token_label_pairs:
-            token, label = pair
-
-            if label == "B-CASE_NAME":
-                case_name += token + " "
-            elif label == "B-VOLUME":
+        for token, label in token_label_pairs:
+            if label == "CASE_NAME":
+                case_name += token
+            elif label == "VOLUME":
                 volume = int(token)
-            elif label == "B-REPORTER":
+            elif label == "REPORTER":
                 reporter = token
-            elif label == "B-PAGE":
+            elif label == "PAGE":
                 starting_page = int(token)
-            elif label == "B-PIN":
+            elif label == "PIN":
                 raw_pin_cite = token
-            elif label == "I-PIN":
-                assert raw_pin_cite is not None, "Encountered I-PIN without B-PIN"
-                raw_pin_cite += _process_token(token)
-            elif label == "B-COURT":
+            # elif label == "I-PIN":
+            #     assert raw_pin_cite is not None, "Encountered I-PIN without B-PIN"
+            #     raw_pin_cite += _process_token(token)
+            elif label == "COURT":
                 court = token
-            elif label == "B-YEAR":
+            elif label == "YEAR":
                 year = int(token)
 
         if volume is None:
@@ -211,7 +217,9 @@ def _process_token(token: str) -> str:
 
 def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     """
-    Aggregates entities that are split into multiple tokens.
+    Take the raw model output and "squash" the tokens into entities.
+    E.g. a series of tokens with labels like: B-CASE_NAME, I-CASE_NAME,
+    I_CASE_NAME should all be aggregated into one LabelPrediction with label CASE_NAME
     """
     aggregated: List[LabelPrediction] = []
 
