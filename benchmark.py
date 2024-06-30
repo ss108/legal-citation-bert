@@ -9,7 +9,7 @@ from typing import Dict
 import fitz
 from beartype import beartype
 
-from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.test_files.loader import enumerate_subdirs
 from src.benchmarking.types import CitationExtractionResult
 
 TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
@@ -77,23 +77,25 @@ def get_test_data():
             )
 
         else:
-            print(f"Skipping directory {subdir} as it lacks the required files.")
+            continue
 
     return test_data
 
+
+enumerate_subdirs()
 
 # td = get_test_data()
 
 # for file_name, data in td.items():
 #     res = asyncio.run(extract_citations_from_document(data.file_text))
 #     print(res)
-#     llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
-#     print(f"File: {file_name}, LLM Error Count: {llm_errs}")
+# llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
+# print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
-chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
-model = get_model()
+# chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
+# model = get_model()
 
-for c in chunks:
-    print(c)
-    predictions = get_labels(c, model)
-    print(predictions)
+# for c in chunks:
+#     print(c)
+#     predictions = get_labels(c, model)
+#     print(predictions)

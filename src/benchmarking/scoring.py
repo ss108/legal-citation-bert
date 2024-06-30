@@ -1,11 +1,11 @@
-from .llm import IterativeCitExtraction
+from .llm import CitationExtractionResult
 from .types import CitationExtractionResult
 
 
 def llm_err_count(
     *,
     correct: CitationExtractionResult,
-    llm_extraction: IterativeCitExtraction,
+    llm_extraction: CitationExtractionResult,
 ) -> int:
     error_count = 0
 

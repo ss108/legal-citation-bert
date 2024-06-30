@@ -4,15 +4,9 @@ import json
 from typing import Dict, List
 
 import tiktoken
-from pydantic import BaseModel
 
+from src.benchmarking.types import CitationExtractionResult
 from src.openai import chat
-
-
-class IterativeCitExtraction(BaseModel):
-    cases: Dict[str, int]
-    statutes: Dict[str, int]
-
 
 LLM_EXTRACTION_PROMPT = """
 Given a block of text and a JSON object representing citations extracted from
@@ -122,9 +116,9 @@ def chunk_by_token(text: str, max_tokens=4000) -> List[str]:
     return [enc.decode(chunk) for chunk in all_chunks]
 
 
-async def extract_citations_from_document(doc: str) -> IterativeCitExtraction:
+async def extract_citations_from_document(doc: str) -> CitationExtractionResult:
     chunks = chunk_by_token(doc)
-    full_count: IterativeCitExtraction = await extract_citations_from_chunks(chunks)
+    full_count: CitationExtractionResult = await extract_citations_from_chunks(chunks)
 
     cases = full_count.cases
 
@@ -140,19 +134,19 @@ async def extract_citations_from_document(doc: str) -> IterativeCitExtraction:
 
 async def _extract_citations_from_chunk(
     text: str, previous_result: Dict = dict()
-) -> IterativeCitExtraction:
+) -> CitationExtractionResult:
     res = await chat(
         system_prompt=LLM_EXTRACTION_PROMPT.format(
             current=str(previous_result),
-            schema=IterativeCitExtraction.model_json_schema(),
+            schema=CitationExtractionResult.model_json_schema(),
         ),
         messages=[{"role": "user", "content": f"Input Text: {text}"}],
     )
-    return IterativeCitExtraction.model_validate_json(res)
+    return CitationExtractionResult.model_validate_json(res)
 
 
-async def extract_citations_from_chunks(chunks: List[str]) -> IterativeCitExtraction:
-    count = IterativeCitExtraction(cases={}, statutes={})
+async def extract_citations_from_chunks(chunks: List[str]) -> CitationExtractionResult:
+    count = CitationExtractionResult(cases={}, statutes={})
 
     for c in chunks:
         count = await _extract_citations_from_chunk(c, count.dict())
