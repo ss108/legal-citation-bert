@@ -17,7 +17,7 @@ class LabelPrediction(NamedTuple):
     token: str
     label: str
 
-    def __repr__(self):
+    def __str__(self):
         return f"{self.token}: {self.label}"
 
     def __eq__(self, value: object) -> bool:

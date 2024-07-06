@@ -117,7 +117,7 @@ def chunk_by_token(text: str, max_tokens=4000) -> List[str]:
     return [enc.decode(chunk) for chunk in all_chunks]
 
 
-async def extract_citations_from_document(doc: str) -> CitationExtractionResult:
+async def llm_extract_citations_from_document(doc: str) -> CitationExtractionResult:
     chunks = chunk_by_token(doc)
     full_count: CitationExtractionResult = await extract_citations_from_chunks(chunks)
 
