@@ -4,6 +4,7 @@ import json
 from typing import Dict, List
 
 import tiktoken
+from wasabi import msg
 
 from src.benchmarking.types import CitationExtractionResult
 from src.openai import chat
@@ -149,6 +150,8 @@ async def extract_citations_from_chunks(chunks: List[str]) -> CitationExtraction
     count = CitationExtractionResult(cases={}, statutes={})
 
     for c in chunks:
+        msg.warn(f"Processing chunk:\n{c}\n")
         count = await _extract_citations_from_chunk(c, count.dict())
+        msg.info(f"Current count:\n{count.dict()}\n")
 
     return count
