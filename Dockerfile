@@ -4,12 +4,10 @@ FROM python:3.11-slim as builder
 
 WORKDIR /project
 
-# COPY --from=pytorch_stage /opt/conda /opt/conda
 
 COPY docker-entrypoint.sh /project/docker-entrypoint.sh
 
 ENV PDM_HOME=/root/.pdm
-# ENV PYTHONPATH "${PYTHONPATH}:/project:/opt/project"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

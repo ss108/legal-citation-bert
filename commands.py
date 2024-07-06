@@ -5,6 +5,7 @@ import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
 
+from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
     delete_from_cache,
@@ -20,13 +21,12 @@ from src.data.prepare import (
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
 from src.training.model import (
     ALL_LABELS,
+    MODEL_NAME,
     get_base_model,
     get_tokenizer,
     load_model_from_checkpoint,
-    MODEL_NAME,
 )
 from src.training.train import test_predict, train_model
-from src.data.generate import generate_tags
 
 app = typer.Typer()
 
@@ -42,6 +42,12 @@ def gen_sentences():
         cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
     )
     asyncio.run(do_sentences(args))  # pyright: ignore
+
+
+@app.command()
+def test_gen():
+    res = asyncio.run(generate_unofficial_citation(2))
+    print(res)
 
 
 @app.command()
@@ -111,13 +117,11 @@ def test_mistral_labeling():
 def test_model():
     device = torch.device("cuda")
     model = load_model_from_checkpoint()
-    model = model.to(device)
+    model = model.to(device)  # pyright: ignore
     # print(model)
 
     tokenizer = get_tokenizer()
-    text = """ sentencing him to 24 months’ imprisonment on one count of
-           possessing heroin with intent to distribute, 21 U.S.C. §§ 841(a);
-           Fexler v. Hock, 123 U.S. 456, 499 (2021)."""
+    text = """warrants similar to the one at issue here. (Opp'n at 9-10.) See, e.g., United States v. Westley, No. 17-CR-171 (MPS), 2018 WL 3448161, at *12 (D. Conn. July 17, 2018) (in upholding Facebook warrant, equating Facebook information to other "electronic evidence" and asserting that "extremely broad" disclosure is a "practical necessity when dealing with electronic evidence");"""
 
     tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
     tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}

@@ -1,10 +1,14 @@
 from pathlib import Path
 from typing import Optional
 
-
-from wasabi import msg
 import torch
-from transformers import AutoConfig, AutoModelForTokenClassification, AutoTokenizer
+from transformers import (
+    AutoConfig,
+    AutoModelForTokenClassification,
+    AutoTokenizer,
+    PreTrainedTokenizerFast,
+)
+from wasabi import msg
 
 MODEL_NAME = "dslim/bert-base-NER"
 
@@ -56,12 +60,15 @@ def get_base_model():
     return model
 
 
-def get_tokenizer():
+def get_tokenizer() -> PreTrainedTokenizerFast:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    assert isinstance(tokenizer, PreTrainedTokenizerFast)
     return tokenizer
 
 
-def load_model_from_checkpoint(version: Optional[str] = None):
+def load_model_from_checkpoint(
+    version: Optional[str] = None,
+) -> AutoModelForTokenClassification:
     training_output_dir = (
         Path(__file__).resolve().parent.parent.parent / "training_output"
     )
@@ -96,8 +103,6 @@ def load_model_from_checkpoint(version: Optional[str] = None):
     if checkpoint_path is None:
         raise FileNotFoundError("No checkpoint found in the specified directory")
 
-    # Load the configuration from the checkpoint, ensuring it matches expected num_labels
-    # Assume ALL_LABELS is defined globally or passed correctly
     config = AutoConfig.from_pretrained(checkpoint_path, num_labels=len(ALL_LABELS))
 
     # Load the model from the checkpoint directory with the correct configuration
