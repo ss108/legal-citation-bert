@@ -43,12 +43,13 @@ def run_model_extraction():
     test_items = td.items()
     model = get_model()
     for file_name, data in test_items:
-        chunks = split_text(data.file_text)
-        msg.warn(f"{len(chunks)} chunks--F!!")
-        for c in chunks[39:55]:
-            msg.info(f"chunk: {c}")
-            res = get_labels(c, model)
-            print(res)
+        print(file_name)
+        # chunks = split_text(data.file_text)
+        # msg.warn(f"{len(chunks)} chunks--F!!")
+        # for c in chunks[39:55]:
+        #     msg.info(f"chunk: {c}")
+        #     res = get_labels(c, model)
+        #     print(res)
 
 
 run_model_extraction()

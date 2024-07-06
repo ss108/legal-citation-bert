@@ -1,5 +1,5 @@
 # Testerson McTest
-Like a test doc for the testing and aggregation process itself :thinking:
+A sample of my 1L appellate brief, being used as a kind of test doc for the testing and aggregation process itself :thinking:
 
 # Campos-Chaves v. Garland
 
