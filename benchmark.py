@@ -28,6 +28,8 @@ td = get_test_data()
 
 def run_llm_extraction():
     for file_name, data in td.items():
+        if file_name != "testerson_mctest":
+            continue
         res = asyncio.run(llm_extract_citations_from_document(data.file_text))
         msg.info("final res")
         print(res.sort())
@@ -52,7 +54,8 @@ def run_model_extraction():
         #     print(res)
 
 
-run_model_extraction()
+# run_model_extraction()
+run_llm_extraction()
 
 # chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
 # model = get_model()

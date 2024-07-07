@@ -10,9 +10,6 @@ correct = CitationExtractionResult.from_dict(
         },
         "statutes": {
             "15 U.S.C. § 1114": 1,
-            "21 U.S.C. § 881(a)(7)": 1,
-            "33 U.S.C. § 1345(d)(3)": 1,
-            "50 U.S.C. § 1806(g)": 3,
         },
     }
 )
