@@ -5,6 +5,7 @@ import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
 
+from src.benchmarking.model import get_labels, get_model, split_text
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
@@ -27,6 +28,7 @@ from src.training.model import (
     load_model_from_checkpoint,
 )
 from src.training.train import test_predict, train_model
+from src.benchmarking.temp_aggregation import CaselawCitation
 
 app = typer.Typer()
 
@@ -112,32 +114,23 @@ def test_mistral_labeling():
     res = asyncio.run(generate_tags(text, tokens))
     print(res)
 
+@app.command()
+def test_from():
+
+
 
 @app.command()
 def test_model():
-    device = torch.device("cuda")
-    model = load_model_from_checkpoint()
-    model = model.to(device)  # pyright: ignore
-    # print(model)
+    model = get_model()
 
-    tokenizer = get_tokenizer()
-    text = """warrants similar to the one at issue here. (Opp'n at 9-10.) See, e.g., United States v. Westley, No. 17-CR-171 (MPS), 2018 WL 3448161, at *12 (D. Conn. July 17, 2018) (in upholding Facebook warrant, equating Facebook information to other "electronic evidence" and asserting that "extremely broad" disclosure is a "practical necessity when dealing with electronic evidence");"""
+    text = """There are genuine issues of material fact as to whether the respondent’s use of his mark is likely to cause confusion among consumers. To prevail on a trademark infringement claim under the Lanham Act, a plaintiff must prove that the allegedly infringing mark would likely cause confusion among consumers. See 15 U.S.C. § 1114. “Confusion” in this context is not limited to a mistaken belief among consumers that the plaintiff is the producer of the defendant’s goods. Starbucks Corp. v. Wolfe’s Borough Coffee, Inc., 588 F.3d 97, 114 (2d Cir. 2009). The confusion could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the plaintiff’s reputation by association with the defendant and their trademark also constitutes confusion for the purposes of the Lanham Act. Id. at 205. 
+    """
 
-    tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
-    tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
+    sentences = split_text(text)
 
-    model.eval()
-
-    with torch.no_grad():
-        outputs = model(**tokenized_input)
-        logits = outputs.logits
-        predictions = torch.argmax(logits, dim=-1)
-
-    predicted_labels = [ALL_LABELS[p] for p in predictions[0].tolist()]
-    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
-
-    for token, label in zip(tokens, predicted_labels):
-        print(f"{token} - {label}")
+    for s in sentences:
+        res = get_labels(s, model)
+        print(res)
 
 
 @app.command()

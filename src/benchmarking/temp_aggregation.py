@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import List, NamedTuple, Optional, Protocol, Tuple, Type, TypeAlias
 
 from pydantic import BaseModel
+from wasabi import msg
 
 PIN_CITE: TypeAlias = Tuple[int, Optional[int]]
 
@@ -38,7 +39,17 @@ class ICitation(Protocol):
 
 
 def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitation]:
-    labels_only = [pair.label for pair in token_label_pairs]
+    citation_start_index = None
+
+    for i, label in enumerate(token_label_pairs):
+        if label.label != "O":
+            citation_start_index = i
+            break
+
+    if not citation_start_index:
+        return None
+
+    labels_only = [pair.label for pair in token_label_pairs[citation_start_index:]]
 
     citation_class: Optional[Type[ICitation]] = None
 
@@ -135,6 +146,7 @@ class CaselawCitation(BaseModel):
     def from_token_label_pairs(
         cls, token_label_pairs: List[LabelPrediction]
     ) -> Optional[CaselawCitation]:
+        msg.info(f"Processing: {token_label_pairs}")
         case_name = ""
         volume = None
         reporter = ""
@@ -163,6 +175,7 @@ class CaselawCitation(BaseModel):
                 year = int(token)
 
         if volume is None:
+            msg.fail("No volume found")
             return None
 
         return cls(
@@ -221,6 +234,7 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     E.g. a series of tokens with labels like: B-CASE_NAME, I-CASE_NAME,
     I_CASE_NAME should all be aggregated into one LabelPrediction with label CASE_NAME
     """
+    # TODO: Revisit this; unclear why couldn't achieve the goal in the `from_token_label_pairs` methods
     aggregated: List[LabelPrediction] = []
 
     current_entity = ""

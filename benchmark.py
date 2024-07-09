@@ -44,18 +44,20 @@ def run_llm_extraction():
 def run_model_extraction():
     test_items = td.items()
     model = get_model()
+
     for file_name, data in test_items:
-        print(file_name)
-        # chunks = split_text(data.file_text)
-        # msg.warn(f"{len(chunks)} chunks--F!!")
-        # for c in chunks[39:55]:
-        #     msg.info(f"chunk: {c}")
-        #     res = get_labels(c, model)
-        #     print(res)
+        if file_name != "testerson_mctest":
+            continue
+
+        chunks = split_text(data.file_text)
+        for c in chunks:
+            msg.info(f"chunk: {c}")
+            res = get_labels(c, model)
+            print(res)
 
 
-# run_model_extraction()
-run_llm_extraction()
+run_model_extraction()
+# run_llm_extraction()
 
 # chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
 # model = get_model()
