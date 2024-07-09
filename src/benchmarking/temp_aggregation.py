@@ -53,19 +53,22 @@ def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitatio
 
     citation_class: Optional[Type[ICitation]] = None
 
+    msg.info(labels_only)
+
     match labels_only:
         case ["B-TITLE", *rest]:
-            ...
-            # citation_class = StatuteCitation
+            citation_class = StatuteCitation
+        case ["B-CODE", *rest]:
+            print("statute DETECTED")
+            citation_class = StatuteCitation
         case ["B-CASE_NAME", *rest]:  # noqa
             citation_class = CaselawCitation
         case _:
             return None
 
-    if not citation_class:
-        return None
+    aggregated = aggregate_entities(token_label_pairs[citation_start_index:])
 
-    citation_class.from_token_label_pairs(token_label_pairs)
+    citation_class.from_token_label_pairs(aggregated)
 
 
 class CaselawCitation(BaseModel):
@@ -210,6 +213,27 @@ class StatuteCitation(BaseModel):
             components.append(self.section)
 
         return " ".join(components)
+
+    @classmethod
+    def from_token_label_pairs(
+        cls, token_label_pairs: List[LabelPrediction]
+    ) -> Optional[StatuteCitation]:
+        title = None
+        code = ""
+        section = ""
+        year = None
+
+        for token, label in token_label_pairs:
+            if label == "TITLE":
+                title = token
+            elif label == "CODE":
+                code += token
+            elif label == "SECTION":
+                section += token
+            elif label == "YEAR":
+                year = int(token)
+
+        return cls(title=title, code=code, section=section, year=year)
 
 
 def _process_label(label: str) -> str:
