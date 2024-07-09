@@ -6,6 +6,7 @@ from datasets import Dataset
 from transformers import BertTokenizerFast
 
 from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.temp_aggregation import CaselawCitation
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
@@ -28,7 +29,6 @@ from src.training.model import (
     load_model_from_checkpoint,
 )
 from src.training.train import test_predict, train_model
-from src.benchmarking.temp_aggregation import CaselawCitation
 
 app = typer.Typer()
 
@@ -114,9 +114,9 @@ def test_mistral_labeling():
     res = asyncio.run(generate_tags(text, tokens))
     print(res)
 
-@app.command()
-def test_from():
 
+@app.command()
+def test_from(): ...
 
 
 @app.command()
@@ -136,10 +136,10 @@ def test_model():
 @app.command()
 def push_to_hub():
     model = load_model_from_checkpoint()
-    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
-    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
 
 @app.command()
