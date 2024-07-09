@@ -4,9 +4,14 @@ import torch
 import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
+from wasabi import msg
 
 from src.benchmarking.model import get_labels, get_model, split_text
-from src.benchmarking.temp_aggregation import CaselawCitation
+from src.benchmarking.temp_aggregation import (
+    CaselawCitation,
+    LabelPrediction,
+    aggregate_entities,
+)
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
@@ -116,19 +121,92 @@ def test_mistral_labeling():
 
 
 @app.command()
-def test_from(): ...
+def test_from():
+    labels = [
+        LabelPrediction(token="[CLS]", label="O"),
+        LabelPrediction(token='"', label="O"),
+        LabelPrediction(token="Con", label="O"),
+        LabelPrediction(token="##fusion", label="O"),
+        LabelPrediction(token='"', label="O"),
+        LabelPrediction(token="in", label="O"),
+        LabelPrediction(token="this", label="O"),
+        LabelPrediction(token="context", label="O"),
+        LabelPrediction(token="is", label="O"),
+        LabelPrediction(token="not", label="O"),
+        LabelPrediction(token="limited", label="O"),
+        LabelPrediction(token="to", label="O"),
+        LabelPrediction(token="a", label="O"),
+        LabelPrediction(token="mistaken", label="O"),
+        LabelPrediction(token="belief", label="O"),
+        LabelPrediction(token="among", label="O"),
+        LabelPrediction(token="consumers", label="O"),
+        LabelPrediction(token="that", label="O"),
+        LabelPrediction(token="the", label="O"),
+        LabelPrediction(token="plaintiff", label="O"),
+        LabelPrediction(token="is", label="O"),
+        LabelPrediction(token="the", label="O"),
+        LabelPrediction(token="producer", label="O"),
+        LabelPrediction(token="of", label="O"),
+        LabelPrediction(token="the", label="O"),
+        LabelPrediction(token="defendant", label="O"),
+        LabelPrediction(token="", label="O"),
+        LabelPrediction(token="s", label="O"),
+        LabelPrediction(token="goods", label="O"),
+        LabelPrediction(token=".", label="O"),
+        LabelPrediction(token="Star", label="B-CASE_NAME"),
+        LabelPrediction(token="##bu", label="I-CASE_NAME"),
+        LabelPrediction(token="##cks", label="I-CASE_NAME"),
+        LabelPrediction(token="Corp", label="I-CASE_NAME"),
+        LabelPrediction(token=".", label="I-CASE_NAME"),
+        LabelPrediction(token="v", label="I-CASE_NAME"),
+        LabelPrediction(token=".", label="I-CASE_NAME"),
+        LabelPrediction(token="Wolfe", label="I-CASE_NAME"),
+        LabelPrediction(
+            token="'",
+            label="I-CASE_NAME",
+        ),
+        LabelPrediction(token="s", label="I-CASE_NAME"),
+        LabelPrediction(token="Borough", label="I-CASE_NAME"),
+        LabelPrediction(token="Coffee", label="I-CASE_NAME"),
+        LabelPrediction(token=",", label="I-CASE_NAME"),
+        LabelPrediction(token="Inc", label="I-CASE_NAME"),
+        LabelPrediction(token=".", label="I-CASE_NAME"),
+        LabelPrediction(token=",", label="O"),
+        LabelPrediction(token="58", label="B-VOLUME"),
+        LabelPrediction(token="##8", label="I-VOLUME"),
+        LabelPrediction(token="F", label="B-REPORTER"),
+        LabelPrediction(token=".", label="I-REPORTER"),
+        LabelPrediction(token="3", label="I-REPORTER"),
+        LabelPrediction(token="##d", label="I-REPORTER"),
+        LabelPrediction(token="97", label="B-PAGE"),
+        LabelPrediction(token=",", label="O"),
+        LabelPrediction(token="114", label="B-PIN"),
+        LabelPrediction(token="(", label="O"),
+        LabelPrediction(token="2d", label="B-COURT"),
+        LabelPrediction(token="C", label="I-COURT"),
+        LabelPrediction(token="##ir", label="I-COURT"),
+        LabelPrediction(token=".", label="I-COURT"),
+        LabelPrediction(token="2009", label="B-YEAR"),
+        LabelPrediction(token=")", label="O"),
+        LabelPrediction(token=".", label="O"),
+        LabelPrediction(token="[SEP]", label="O"),
+    ]
+    ents = aggregate_entities(labels)
+    res = CaselawCitation.from_token_label_pairs(ents)
+    print(res)
 
 
 @app.command()
 def test_model():
     model = get_model()
 
-    text = """There are genuine issues of material fact as to whether the respondent’s use of his mark is likely to cause confusion among consumers. To prevail on a trademark infringement claim under the Lanham Act, a plaintiff must prove that the allegedly infringing mark would likely cause confusion among consumers. See 15 U.S.C. § 1114. “Confusion” in this context is not limited to a mistaken belief among consumers that the plaintiff is the producer of the defendant’s goods. Starbucks Corp. v. Wolfe’s Borough Coffee, Inc., 588 F.3d 97, 114 (2d Cir. 2009). The confusion could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the plaintiff’s reputation by association with the defendant and their trademark also constitutes confusion for the purposes of the Lanham Act. Id. at 205. 
+    text = """A. The District Court Erred in Granting Summary Judgment on Appellant's Claim of Negligence\n The District Court's decision to grant summary judgment on the basis of lack of duty was in error. In Smith v. City of Los Angeles, 123 F.3d 456, 459 (9th Cir. 2000), this Court held that "a property owner owes a duty of care to entrants on their property, regardless of the nature of the activity the entrant is engaged in." Moreover, the California Civil Code § 2100 explicitly states that "all property owners owe entrants a basic level of care."
     """
 
     sentences = split_text(text)
 
     for s in sentences:
+        msg.info(s)
         res = get_labels(s, model)
         print(res)
 

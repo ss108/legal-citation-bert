@@ -241,6 +241,9 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     current_label = ""
 
     for token, label in labels:
+        if len(token) == 0:
+            continue
+
         if token[0].isupper() and len(current_entity) > 0 and "CASE_NAME" in label:
             token = f" {token}"
 
