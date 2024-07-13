@@ -11,7 +11,7 @@ from src.benchmarking.temp_aggregation import (
     CaselawCitation,
     LabelPrediction,
     aggregate_entities,
-    citation_from,
+    citations_from,
 )
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
@@ -153,9 +153,8 @@ def test_from():
         LabelPrediction(token=".", label="O"),
         LabelPrediction(token="[SEP]", label="O"),
     ]
-    # ents = aggregate_entities(labels)
-    # res = St.from_token_label_pairs(ents)
-    res = citation_from(labels)
+
+    res = citations_from(labels)
     print(res)
 
 
@@ -163,13 +162,13 @@ def test_from():
 def test_model():
     model = get_model()
 
-    text = """A. The District Court Erred in Granting Summary Judgment on Appellant's Claim of Negligence\n The District Court's decision to grant summary judgment on the basis of lack of duty was in error. In Smith v. City of Los Angeles, 123 F.3d 456, 459 (9th Cir. 2000), this Court held that "a property owner owes a duty of care to entrants on their property, regardless of the nature of the activity the entrant is engaged in." Moreover, the California Civil Code § 2100 explicitly states that "all property owners owe entrants a basic level of care."
-    """
+    text = """City U. L.R. 551, 589 (2015) (quoting Schane v.  Int’l Bhd. of
+Teamsters Union Local No. 710 Pension  Fund Pension Plan, 760 F.3d 585, 589–90
+(7th Cir.  2014))."""
 
     sentences = split_text(text)
 
     for s in sentences:
-        msg.info(s)
         res = get_labels(s, model)
         print(res)
 

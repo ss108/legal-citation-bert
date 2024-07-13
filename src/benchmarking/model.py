@@ -10,7 +10,7 @@ from src.training.model import (
     load_model_from_checkpoint,
 )
 
-from .temp_aggregation import LabelPrediction, citation_from
+from .temp_aggregation import LabelPrediction, citations_from
 
 DEVICE = torch.device("cuda")
 
