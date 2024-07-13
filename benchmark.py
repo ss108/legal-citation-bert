@@ -6,7 +6,7 @@ from pathlib import Path
 from wasabi import msg
 
 from src.benchmarking.llm import llm_extract_citations_from_document
-from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.model import citation_from, get_labels, get_model, split_text
 from src.benchmarking.test_files.loader import get_test_data
 
 TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
@@ -53,7 +53,9 @@ def run_model_extraction():
         for c in chunks:
             msg.info(f"chunk: {c}")
             res = get_labels(c, model)
-            print(res)
+            c = citation_from(res)
+            print(c)
+            # print(res)
 
 
 run_model_extraction()

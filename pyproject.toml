@@ -29,6 +29,7 @@ dependencies = [
     "beartype>=0.18.5",
     "pymupdf>=1.24.5",
     "more-itertools>=10.3.0",
+    "debugpy>=1.8.2",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"

@@ -68,7 +68,8 @@ def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitatio
 
     aggregated = aggregate_entities(token_label_pairs[citation_start_index:])
 
-    citation_class.from_token_label_pairs(aggregated)
+    o = citation_class.from_token_label_pairs(aggregated)
+    return o
 
 
 class CaselawCitation(BaseModel):
