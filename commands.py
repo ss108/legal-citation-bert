@@ -11,7 +11,7 @@ from src.benchmarking.temp_aggregation import (
     CaselawCitation,
     LabelPrediction,
     aggregate_entities,
-    citations_from,
+    citation_from,
 )
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
@@ -173,6 +173,23 @@ Teamsters Union Local No. 710 Pension  Fund Pension Plan, 760 F.3d 585, 589–90
         print(res)
 
 
+# @app.command()
+# def test_model_agg():
+#     model = get_model()
+
+#     text = """ The confusion
+# could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the
+# plaintiff’s reputation by association with the defendant and"""
+
+#     sentences = split_text(text)
+
+#     for s in sentences:
+#         res = get_labels(s, model)
+#         cits = citations_from(res)
+#         if len(cits) > 0:
+#             print(cits)
+
+
 @app.command()
 def push_to_hub():
     model = load_model_from_checkpoint()
@@ -180,11 +197,6 @@ def push_to_hub():
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
     tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
-
-
-@app.command()
-def hi():
-    print("hi")
 
 
 if __name__ == "__main__":

@@ -44,43 +44,60 @@ class ICitation(Protocol):
     def __eq__(self, other: object) -> bool: ...
 
 
-def citations_from(
-    token_label_pairs: List[LabelPrediction],
-) -> List[Optional[ICitation]]:
-    citations = []
-    current_citation = []
+def citations_from(token_label_pairs: List[LabelPrediction]) -> List[ICitation]:
+    CIT_START_LABELS = ["B-TITLE", "B-CODE", "B-SECTION", "B-CASE_NAME", "B-VOLUME"]
+    grouped = []
 
-    for pair in token_label_pairs:
-        if pair.label.startswith("B-"):
-            if current_citation:
-                citations.append(current_citation)
-                current_citation = []
-        if pair.label != "O":
-            current_citation.append(pair)
+    current_start = 0
+    for i, label in enumerate(token_label_pairs):
+        if label.label in CIT_START_LABELS:
+            current_start = i
 
-    if current_citation:
-        citations.append(current_citation)
+            previous = token_label_pairs[:current_start]
+            if len(previous) > 0:
+                grouped.append(previous)
 
-    result_citations = []
+    if current_start != 0 and len(grouped) == 0:
+        grouped.append(token_label_pairs)
 
-    for citation in citations:
-        labels_only = [pair.label for pair in citation]
-        citation_class: Optional[Type[ICitation]] = None
+    citations = [citation_from(group) for group in grouped]
+    return [c for c in citations if c is not None]
 
-        match labels_only[0]:
-            case "B-TITLE" | "B-CODE" | "B-SECTION":
-                citation_class = StatuteCitation
-            case "B-CASE_NAME":
-                citation_class = CaselawCitation
-            case _:
-                continue  # Skip if no matching type is found
 
-        aggregated = aggregate_entities(citation)
-        if citation_class:
-            citation_instance = citation_class.from_token_label_pairs(aggregated)
-            result_citations.append(citation_instance)
+def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitation]:
+    citation_start_index = None
 
-    return result_citations
+    for i, label in enumerate(token_label_pairs):
+        if label.label != "O":
+            citation_start_index = i
+            break
+
+    if not citation_start_index:
+        return None
+
+    labels_only = [pair.label for pair in token_label_pairs[citation_start_index:]]
+
+    if len(labels_only) == 0:
+        return None
+
+    citation_class: Optional[Type[ICitation]] = None
+
+    msg.info(labels_only)
+
+    first_label = labels_only[0]
+
+    match first_label:
+        case "B-TITLE" | "B-CODE" | "B-SECTION":
+            citation_class = StatuteCitation
+        case "B-CASE_NAME" | "B-VOLUME":
+            citation_class = CaselawCitation
+        case _:
+            return None
+
+    aggregated = aggregate_entities(token_label_pairs[citation_start_index:])
+
+    o = citation_class.from_token_label_pairs(aggregated)
+    return o
 
 
 class CaselawCitation(BaseModel):
