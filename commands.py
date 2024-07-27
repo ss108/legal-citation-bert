@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import torch
 import typer
@@ -13,7 +14,11 @@ from src.benchmarking.temp_aggregation import (
     aggregate_entities,
     citations_from,
 )
-from src.data.generate import generate_tags, generate_unofficial_citation
+from src.data.generate import (
+    generate_prose_statute_citation,
+    generate_tags,
+    generate_unofficial_citation,
+)
 from src.data.prepare import (
     create_candidate_dataset,
     delete_from_cache,
@@ -24,6 +29,8 @@ from src.data.prepare import (
     load_raw_cl_docket_entries_ds,
     process_cl_doc,
     save_cl_docket_entries_ds,
+    save_data_to_file,
+    sents_to_data,
     split_and_save,
 )
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
@@ -46,10 +53,19 @@ def save_ds():
 
 @app.command()
 def gen_sentences():
-    args = DataGenerationArgs(
-        cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
-    )
-    asyncio.run(do_sentences(args))  # pyright: ignore
+    # args = DataGenerationArgs(
+    #     cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
+    # )
+    # asyncio.run(do_sentences(args))  # pyright: ignore
+
+    asyncio.run(gen_prose_statute_data())
+
+
+async def gen_prose_statute_data():
+    res = await generate_prose_statute_citation(4)
+    data = await sents_to_data(res)
+    file_name = f"prose_statutes_{int(time.time())}.jsonl"
+    await save_data_to_file(data, file_name)
 
 
 @app.command()
@@ -109,53 +125,6 @@ def process_cl_docs():
         tasks.append(process_cl_doc(d))  # pyright: ignore
 
     asyncio.run(gather_wrapper(tasks))
-
-
-@app.command()
-def test_mistral_labeling():
-    text = "The quick brown fox jumps over the lazy dog. Hox v. Doe, 123 U.S. 456, 499 (2021)."
-    tokenizer = get_tokenizer()
-
-    tokens = tokenizer.tokenize(text)
-    res = asyncio.run(generate_tags(text, tokens))
-    print(res)
-
-
-# @app.command()
-# def test_from():
-#     labels = [
-#         LabelPrediction(token="[CLS]", label="O"),
-#         LabelPrediction(token="Moreover", label="O"),
-#         LabelPrediction(token=",", label="O"),
-#         LabelPrediction(token="the", label="O"),
-#         LabelPrediction(token="California", label="O"),
-#         LabelPrediction(token="Civil", label="B-CODE"),
-#         LabelPrediction(token="Code", label="I-CODE"),
-#         LabelPrediction(token="§", label="O"),
-#         LabelPrediction(token="210", label="B-SECTION"),
-#         LabelPrediction(token="##0", label="I-SECTION"),
-#         LabelPrediction(token="explicitly", label="O"),
-#         LabelPrediction(token="states", label="O"),
-#         LabelPrediction(token="that", label="O"),
-#         LabelPrediction(token='"', label="O"),
-#         LabelPrediction(token="all", label="O"),
-#         LabelPrediction(token="property", label="O"),
-#         LabelPrediction(token="owners", label="O"),
-#         LabelPrediction(token="owe", label="O"),
-#         LabelPrediction(token="en", label="O"),
-#         LabelPrediction(token="##tra", label="O"),
-#         LabelPrediction(token="##nts", label="O"),
-#         LabelPrediction(token="a", label="O"),
-#         LabelPrediction(token="basic", label="O"),
-#         LabelPrediction(token="level", label="O"),
-#         LabelPrediction(token="of", label="O"),
-#         LabelPrediction(token="care", label="O"),
-#         LabelPrediction(token=".", label="O"),
-#         LabelPrediction(token="[SEP]", label="O"),
-#     ]
-
-#     res = citations_from(labels)
-#     print(res)
 
 
 @app.command()

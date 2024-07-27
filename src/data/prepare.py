@@ -1,6 +1,6 @@
 import asyncio
-import shutil
 import glob
+import shutil
 import time
 from pathlib import Path
 from typing import Dict, List
@@ -29,9 +29,21 @@ async def do_sentences(a: DataGenerationArgs):
 
     data: List[Datum] = await sents_to_data(res)
 
-    df = pd.DataFrame([x.dict() for x in data])
     file_name = f"{RAW_DATA_DIR}/sentences_gen_{a.cit_type.name}_{a.cit_form.name}_{int(time.time())}.jsonl"
 
+    df = pd.DataFrame([x.dict() for x in data])
+
+    msg.info(f"Saving to {file_name}")
+
+    df.to_json(
+        file_name,
+        orient="records",
+        lines=True,
+    )
+
+
+async def save_data_to_file(data: List[Datum], file_name: str):
+    df = pd.DataFrame([x.dict() for x in data])
     msg.info(f"Saving to {file_name}")
 
     df.to_json(

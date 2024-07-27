@@ -160,6 +160,44 @@ async def generate_unofficial_citation(n: int = 1) -> List[Sentence]:
     return formatted_results
 
 
+async def generate_prose_statute_citation(n: int = 1) -> List[Sentence]:
+    PROMPT = f"""
+    GOAL: Generate a snippet from a fictitious legal motion containing a statute which is cited not per the Bluebook, but in a more prose-like manner. The sentence will be used to train a NER model.
+
+    EXAMPLES:\n
+    - Per Section 870 of the CPLR...
+    - Plaintiff brings this complaint pursuant to Government Code Section 999.
+    - Accordingly, the defendant's motion thus fails to comply with the requirements of Title 28, and should thus be denied.
+    - The court finds that the defendant's actions were in violation of the California Penal Code, particularly Section 1234.
+
+    OUTPUT in this JSON format: {sentence_schema}
+    """
+
+    tasks = []
+    for _ in range(n):
+        tasks.append(
+            chat(
+                messages=[],
+                system_prompt=PROMPT,
+                temperature=1.0,
+                model="gpt-4o",
+            )
+        )
+
+    raw_results = await asyncio.gather(*tasks)
+    formatted_results = []
+
+    for r in raw_results:
+        try:
+            assert len(r) > 0
+            sent = json.loads(r)
+            formatted_results.append(sent)
+        except Exception:
+            continue
+
+    return formatted_results
+
+
 class TokenTags(TypedDict):
     tags: List[Tuple[str, str]]
 
