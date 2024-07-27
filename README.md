@@ -15,14 +15,12 @@ the first instance. I can guarantee you that, at the time of this writing in
 June 2024, GPT-4 can do a better job than this library. It knows the Bluebook
 well, and it also understands California's citation style.
 
-However, if you're sitting on troves of legal documents with citations, with more documents
-coming in daily--e.g. if you are the Free Law Project
+However, if you're sitting on troves of legal documents with citations, with more documents coming in daily--e.g. if you are the Free Law Project
 (https://www.courtlistener.com/) or Trellis (trellis.law) (my employer at the
 time of this writing), then going using a standard LLM API, or even a
 "self-hosted" commerical LLM on Azure or Bedrock, isn't going to cut it.
 
-You can try seeing if an open-source LLM can do the job, but ultimately, a model like
-this is cheaper and hopefully there is some benefit in its being specifically
+You can try seeing if an open-source LLM can do the job, but ultimately, a model like this is cheaper and hopefully there is some benefit in its being specifically
 tailored for the task.
 
 (And if nothing else, it's good for my resume/career)

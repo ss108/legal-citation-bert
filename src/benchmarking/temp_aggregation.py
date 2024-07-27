@@ -82,7 +82,7 @@ def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitatio
 
     citation_class: Optional[Type[ICitation]] = None
 
-    msg.info(labels_only)
+    # msg.info(labels_only)
 
     first_label = labels_only[0]
 

@@ -11,7 +11,7 @@ from src.benchmarking.temp_aggregation import (
     CaselawCitation,
     LabelPrediction,
     aggregate_entities,
-    citation_from,
+    citations_from,
 )
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
@@ -121,56 +121,56 @@ def test_mistral_labeling():
     print(res)
 
 
-@app.command()
-def test_from():
-    labels = [
-        LabelPrediction(token="[CLS]", label="O"),
-        LabelPrediction(token="Moreover", label="O"),
-        LabelPrediction(token=",", label="O"),
-        LabelPrediction(token="the", label="O"),
-        LabelPrediction(token="California", label="O"),
-        LabelPrediction(token="Civil", label="B-CODE"),
-        LabelPrediction(token="Code", label="I-CODE"),
-        LabelPrediction(token="§", label="O"),
-        LabelPrediction(token="210", label="B-SECTION"),
-        LabelPrediction(token="##0", label="I-SECTION"),
-        LabelPrediction(token="explicitly", label="O"),
-        LabelPrediction(token="states", label="O"),
-        LabelPrediction(token="that", label="O"),
-        LabelPrediction(token='"', label="O"),
-        LabelPrediction(token="all", label="O"),
-        LabelPrediction(token="property", label="O"),
-        LabelPrediction(token="owners", label="O"),
-        LabelPrediction(token="owe", label="O"),
-        LabelPrediction(token="en", label="O"),
-        LabelPrediction(token="##tra", label="O"),
-        LabelPrediction(token="##nts", label="O"),
-        LabelPrediction(token="a", label="O"),
-        LabelPrediction(token="basic", label="O"),
-        LabelPrediction(token="level", label="O"),
-        LabelPrediction(token="of", label="O"),
-        LabelPrediction(token="care", label="O"),
-        LabelPrediction(token=".", label="O"),
-        LabelPrediction(token="[SEP]", label="O"),
-    ]
+# @app.command()
+# def test_from():
+#     labels = [
+#         LabelPrediction(token="[CLS]", label="O"),
+#         LabelPrediction(token="Moreover", label="O"),
+#         LabelPrediction(token=",", label="O"),
+#         LabelPrediction(token="the", label="O"),
+#         LabelPrediction(token="California", label="O"),
+#         LabelPrediction(token="Civil", label="B-CODE"),
+#         LabelPrediction(token="Code", label="I-CODE"),
+#         LabelPrediction(token="§", label="O"),
+#         LabelPrediction(token="210", label="B-SECTION"),
+#         LabelPrediction(token="##0", label="I-SECTION"),
+#         LabelPrediction(token="explicitly", label="O"),
+#         LabelPrediction(token="states", label="O"),
+#         LabelPrediction(token="that", label="O"),
+#         LabelPrediction(token='"', label="O"),
+#         LabelPrediction(token="all", label="O"),
+#         LabelPrediction(token="property", label="O"),
+#         LabelPrediction(token="owners", label="O"),
+#         LabelPrediction(token="owe", label="O"),
+#         LabelPrediction(token="en", label="O"),
+#         LabelPrediction(token="##tra", label="O"),
+#         LabelPrediction(token="##nts", label="O"),
+#         LabelPrediction(token="a", label="O"),
+#         LabelPrediction(token="basic", label="O"),
+#         LabelPrediction(token="level", label="O"),
+#         LabelPrediction(token="of", label="O"),
+#         LabelPrediction(token="care", label="O"),
+#         LabelPrediction(token=".", label="O"),
+#         LabelPrediction(token="[SEP]", label="O"),
+#     ]
 
-    res = citations_from(labels)
-    print(res)
+#     res = citations_from(labels)
+#     print(res)
 
 
 @app.command()
 def test_model():
     model = get_model()
 
-    text = """City U. L.R. 551, 589 (2015) (quoting Schane v.  Int’l Bhd. of
-Teamsters Union Local No. 710 Pension  Fund Pension Plan, 760 F.3d 585, 589–90
-(7th Cir.  2014))."""
+    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain."""
 
     sentences = split_text(text)
 
     for s in sentences:
         res = get_labels(s, model)
-        print(res)
+        # print(res)
+        f = citations_from(res)
+        # print(f)
 
 
 # @app.command()

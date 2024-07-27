@@ -4,7 +4,6 @@ from typing import List, Optional, Tuple, TypedDict, get_type_hints
 
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Sentence
 from src.openai import chat
-from src.mistral import chat as mistral_chat
 from src.training.model import ALL_LABELS
 
 sentence_schema = get_type_hints(Sentence)
@@ -68,7 +67,10 @@ async def _generate_long(n: int, type: CIT_TYPE = CIT_TYPE.CASE) -> List[Sentenc
     for _ in range(n):
         tasks.append(
             chat(
-                messages=[], system_prompt=PROMPT, temperature=1.0, model="gpt-4-turbo"
+                messages=[],
+                system_prompt=PROMPT,
+                temperature=1.0,
+                model="gpt-4-turbo-preview",
             )
         )
 
@@ -100,7 +102,10 @@ async def _generate_short(n: int, type: CIT_TYPE = CIT_TYPE.CASE) -> List[Senten
     for _ in range(n):
         tasks.append(
             chat(
-                messages=[], system_prompt=PROMPT, temperature=1.0, model="gpt-4-turbo"
+                messages=[],
+                system_prompt=PROMPT,
+                temperature=1.0,
+                model="gpt-4-turbo-preview",
             )
         )
 
@@ -135,7 +140,10 @@ async def generate_unofficial_citation(n: int = 1) -> List[Sentence]:
     for _ in range(n):
         tasks.append(
             chat(
-                messages=[], system_prompt=PROMPT, temperature=1.0, model="gpt-4-turbo"
+                messages=[],
+                system_prompt=PROMPT,
+                temperature=1.0,
+                model="gpt-4-turbo-preview",
             )
         )
 
@@ -287,6 +295,10 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     FULL EXAMPLE 6:
     Text: 'industry. See 42 U.S .C. § 12201(c).'
     Tags: [('industry', 'O'), ('.', 'O'), ('See', 'O'), ('42', 'B-TITLE'), ('U', 'B-CODE'), ('.', 'I-CODE'), ('S', 'I-CODE'), ('.', 'I-CODE'), ('C', 'I-CODE'), ('.', 'I-CODE'), ('§', 'O'), ('12201', 'B-SECTION'), ('(', 'I-SECTION'), ('c', 'I-SECTION'), (')', 'I-SECTION')]
+
+    FULL EXAMPLE 7:
+    Text: An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain.
+    Tags: [('[CLS]', 'O'), ('An', 'O'), ('employer', 'O'), ("'", 'O'), ('s', 'O'), ('liability', 'O'), ('under', 'O'), ('F', 'O'), ('##E', 'O'), ('##HA', 'O'), ('for', 'O'), ('hostile', 'O'), ('environment', 'O'), ('sexual', 'O'), ('harassment', 'O'), ('committed', 'O'), ('by', 'O'), ('customers', 'O'), ('or', 'O'), ('clients', 'O'), ('prior', 'O'), ('to', 'O'), ('the', 'O'), ('effective', 'O'), ('date', 'O'), ('of', 'O'), ('the', 'O'), ('2003', 'O'), ('amendment', 'O'), ('to', 'O'), ('section', 'B-TITLE'), ('129', 'B-SECTION'), ('##40', 'I-SECTION'), (',', 'O'), ('subdivision', 'O'), ('(', 'I-SECTION'), ('j', 'I-SECTION'), (')', 'I-SECTION'), ('(', 'O'), ('St', 'O'), ('##ats', 'O'), ('.', 'O'), ('2003', 'O'), (',', 'O'), ('ch', 'O'), ('.', 'O'), ('67', 'O'), ('##1', 'O'), (',', 'O'), ('§', 'O'), ('1', 'O'), (')', 'O'), ('is', 'O'), ('uncertain', 'O'), ('.', 'O'), ('[SEP]', 'O')]
 
     \n
     Do not assign any labels not in the list above. If a citation is not for

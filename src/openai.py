@@ -1,23 +1,18 @@
-from typing import Dict, List
+from typing import Dict, List, Literal
 
 import openai
-import tiktoken
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-def get_logit_bias():
-    encoder = tiktoken.get_encoding("cl100k_base")
-    tokens = encoder.encode("In")
-    print(tokens)
+OPENAI_MODEL_OPTS = Literal["gpt-4-turbo-preview", "gpt-4o", "gpt-4o-mini"]
 
 
 async def chat(
     *,
     system_prompt: str,
     messages: List[Dict],
-    model: str = "gpt-4-turbo",
+    model: OPENAI_MODEL_OPTS = "gpt-4-turbo-preview",
     temperature: float = 1.0,
 ) -> str:
     client = openai.AsyncOpenAI()
