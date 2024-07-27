@@ -20,6 +20,7 @@ from src.data.generate import (
     generate_unofficial_citation,
 )
 from src.data.prepare import (
+    RAW_DATA_DIR,
     create_candidate_dataset,
     delete_from_cache,
     do_sentences,
@@ -64,7 +65,7 @@ def gen_sentences():
 async def gen_prose_statute_data():
     res = await generate_prose_statute_citation(4)
     data = await sents_to_data(res)
-    file_name = f"prose_statutes_{int(time.time())}.jsonl"
+    file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
     await save_data_to_file(data, file_name)
 
 
