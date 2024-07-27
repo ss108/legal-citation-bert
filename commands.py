@@ -4,7 +4,15 @@ import torch
 import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
+from wasabi import msg
 
+from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.temp_aggregation import (
+    CaselawCitation,
+    LabelPrediction,
+    aggregate_entities,
+    citation_from,
+)
 from src.data.generate import generate_tags, generate_unofficial_citation
 from src.data.prepare import (
     create_candidate_dataset,
@@ -114,44 +122,81 @@ def test_mistral_labeling():
 
 
 @app.command()
+def test_from():
+    labels = [
+        LabelPrediction(token="[CLS]", label="O"),
+        LabelPrediction(token="Moreover", label="O"),
+        LabelPrediction(token=",", label="O"),
+        LabelPrediction(token="the", label="O"),
+        LabelPrediction(token="California", label="O"),
+        LabelPrediction(token="Civil", label="B-CODE"),
+        LabelPrediction(token="Code", label="I-CODE"),
+        LabelPrediction(token="§", label="O"),
+        LabelPrediction(token="210", label="B-SECTION"),
+        LabelPrediction(token="##0", label="I-SECTION"),
+        LabelPrediction(token="explicitly", label="O"),
+        LabelPrediction(token="states", label="O"),
+        LabelPrediction(token="that", label="O"),
+        LabelPrediction(token='"', label="O"),
+        LabelPrediction(token="all", label="O"),
+        LabelPrediction(token="property", label="O"),
+        LabelPrediction(token="owners", label="O"),
+        LabelPrediction(token="owe", label="O"),
+        LabelPrediction(token="en", label="O"),
+        LabelPrediction(token="##tra", label="O"),
+        LabelPrediction(token="##nts", label="O"),
+        LabelPrediction(token="a", label="O"),
+        LabelPrediction(token="basic", label="O"),
+        LabelPrediction(token="level", label="O"),
+        LabelPrediction(token="of", label="O"),
+        LabelPrediction(token="care", label="O"),
+        LabelPrediction(token=".", label="O"),
+        LabelPrediction(token="[SEP]", label="O"),
+    ]
+
+    res = citations_from(labels)
+    print(res)
+
+
+@app.command()
 def test_model():
-    device = torch.device("cuda")
-    model = load_model_from_checkpoint()
-    model = model.to(device)  # pyright: ignore
-    # print(model)
+    model = get_model()
 
-    tokenizer = get_tokenizer()
-    text = """warrants similar to the one at issue here. (Opp'n at 9-10.) See, e.g., United States v. Westley, No. 17-CR-171 (MPS), 2018 WL 3448161, at *12 (D. Conn. July 17, 2018) (in upholding Facebook warrant, equating Facebook information to other "electronic evidence" and asserting that "extremely broad" disclosure is a "practical necessity when dealing with electronic evidence");"""
+    text = """City U. L.R. 551, 589 (2015) (quoting Schane v.  Int’l Bhd. of
+Teamsters Union Local No. 710 Pension  Fund Pension Plan, 760 F.3d 585, 589–90
+(7th Cir.  2014))."""
 
-    tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
-    tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
+    sentences = split_text(text)
 
-    model.eval()
+    for s in sentences:
+        res = get_labels(s, model)
+        print(res)
 
-    with torch.no_grad():
-        outputs = model(**tokenized_input)
-        logits = outputs.logits
-        predictions = torch.argmax(logits, dim=-1)
 
-    predicted_labels = [ALL_LABELS[p] for p in predictions[0].tolist()]
-    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
+# @app.command()
+# def test_model_agg():
+#     model = get_model()
 
-    for token, label in zip(tokens, predicted_labels):
-        print(f"{token} - {label}")
+#     text = """ The confusion
+# could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the
+# plaintiff’s reputation by association with the defendant and"""
+
+#     sentences = split_text(text)
+
+#     for s in sentences:
+#         res = get_labels(s, model)
+#         cits = citations_from(res)
+#         if len(cits) > 0:
+#             print(cits)
 
 
 @app.command()
 def push_to_hub():
     model = load_model_from_checkpoint()
-    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
-    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
-
-
-@app.command()
-def hi():
-    print("hi")
+    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
 
 if __name__ == "__main__":
