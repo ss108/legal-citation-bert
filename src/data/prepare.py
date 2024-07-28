@@ -174,6 +174,9 @@ def get_jsonl_files():
 
 
 def create_candidate_dataset(version="v0"):
+    version_dir_path = Path(f"{PREPARED_DATA_DIR}/{version}")
+    version_dir_path.mkdir(parents=True, exist_ok=True)
+
     jsonl_files = get_jsonl_files()
     combined_df = pd.DataFrame()  # Start with an empty dataframe
     dfs = []
@@ -201,7 +204,7 @@ def create_candidate_dataset(version="v0"):
 
     combined_df = pd.concat(dfs, ignore_index=True)
     combined_df.to_json(
-        f"{PREPARED_DATA_DIR}/{version}/candidate.jsonl",
+        f"{version_dir_path}/candidate.jsonl",
         orient="records",
         lines=True,
     )

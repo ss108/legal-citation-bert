@@ -92,7 +92,7 @@ def store_model():
 
 
 @app.command()
-def prepare_candidate_dataset(version: str = "v1"):
+def prepare_candidate_dataset(version: str = "v0"):
     create_candidate_dataset(version)
 
 
@@ -103,17 +103,22 @@ def save_hf_ds(version: str = "v0"):
 
 
 @app.command()
-def save_training_ds(version: str = "v0"):
+def create_and_save_ds(version: str = "v0"):
     create_candidate_dataset(version)
+    split_and_save_ds(version)
+    # ds = load_candidate_ds(version)
+    # split_and_save(ds, version)
+
+@app.command()
+def split_and_save_ds(version: str = "v0"):
     ds = load_candidate_ds(version)
     split_and_save(ds, version)
-
 
 @app.command()
 def train(version: str = "v0"):
     ds = load_for_training(version)
-    _, trainer = train_model(ds)
-    test_predict(trainer, ds["test"])
+    # _, trainer = train_model(ds)
+    # test_predict(trainer, ds["test"])
 
 
 @app.command()
