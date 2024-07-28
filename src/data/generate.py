@@ -164,6 +164,8 @@ async def generate_prose_statute_citation(n: int = 1) -> List[Sentence]:
     PROMPT = f"""
     GOAL: Generate a snippet from a fictitious legal motion containing a statute which is cited not per the Bluebook, but in a more prose-like manner. The sentence will be used to train a NER model.
 
+    The 'statute' should be a citable legal provision, that furnishes support for typical arguments, as opposed to a reference to a legislative act.
+
     EXAMPLES:\n
     - Per Section 870 of the CPLR...
     - Plaintiff brings this complaint pursuant to Government Code Section 999.
@@ -228,6 +230,7 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     CODE: The abbreviation or name of the code, e.g. 'U.S.C.' or 'Fed. R. Civ. P.'
     SECTION: All sections or subsections of the statute. E.g. '1234' in '28
     U.S.C. 1234', or '12(a)(3)' in 'Fed. R. Civ. P. 12(a)(3)'.
+    Some of the citations may be written out instead of abbreviated per the Bluebook; for example, instead of 12 U.S.C. § 1234, the citation may be written as 'Section 1234 of Title 12 of the United States Code'.
     
     Misc:
     ID: Used to label 'id' when it refers to the previous citation, e.g. Id. at
