@@ -87,11 +87,6 @@ def delete_cached_file(name: str):
 
 
 @app.command()
-def store_model():
-    get_base_model()
-
-
-@app.command()
 def prepare_candidate_dataset(version: str = "v0"):
     create_candidate_dataset(version)
 
