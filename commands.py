@@ -109,16 +109,18 @@ def create_and_save_ds(version: str = "v0"):
     # ds = load_candidate_ds(version)
     # split_and_save(ds, version)
 
+
 @app.command()
 def split_and_save_ds(version: str = "v0"):
     ds = load_candidate_ds(version)
     split_and_save(ds, version)
 
+
 @app.command()
 def train(version: str = "v0"):
     ds = load_for_training(version)
-    # _, trainer = train_model(ds)
-    # test_predict(trainer, ds["test"])
+    _, trainer = train_model(ds)
+    test_predict(trainer, ds["test"])
 
 
 @app.command()
@@ -149,8 +151,8 @@ def test_model():
 
     for s in sentences:
         res = get_labels(s, model)
-        # print(res)
-        f = citations_from(res)
+        print(res)
+        # f = citations_from(res)
         # print(f)
 
 
