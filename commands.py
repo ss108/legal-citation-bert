@@ -2,7 +2,6 @@ import asyncio
 import time
 from typing import List
 
-import torch
 import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
@@ -71,7 +70,7 @@ async def gen_prose_statute_data():
             "text": "(§ 12940, subd. (j)(1); Carrisales v. Department of Corrections (1999) 21 Cal.4th 1132, 1136-1137 [90 Cal.Rptr.2d 804, 988 P.2d 1083].) In the",
         }
     ]
-    data = await sents_to_data(res) 
+    data = await sents_to_data(res)
     file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
     await save_data_to_file(data, file_name)
 
@@ -93,8 +92,8 @@ def store_model():
 
 
 @app.command()
-def prepare_candidate_dataset():
-    create_candidate_dataset()
+def prepare_candidate_dataset(version: str = "v1"):
+    create_candidate_dataset(version)
 
 
 @app.command()
@@ -111,8 +110,8 @@ def save_training_ds(version: str = "v0"):
 
 
 @app.command()
-def train():
-    ds = load_for_training()
+def train(version: str = "v0"):
+    ds = load_for_training(version)
     _, trainer = train_model(ds)
     test_predict(trainer, ds["test"])
 
