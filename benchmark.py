@@ -31,6 +31,7 @@ def run_llm_extraction():
     for file_name, data in td.items():
         if file_name != "testerson_mctest":
             continue
+
         res = asyncio.run(llm_extract_citations_from_document(data.file_text))
         msg.info("final res")
         print(res.sort())

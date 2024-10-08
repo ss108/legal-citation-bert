@@ -168,9 +168,10 @@ async def generate_prose_statute_citation(n: int = 1) -> List[Sentence]:
 
     EXAMPLES:\n
     - Per Section 870 of the CPLR...
-    - Plaintiff brings this complaint pursuant to Government Code Section 999.
+    - Plaintiff brings this complaint pursuant to Government Code Section 999(b)(1)(ii).
     - Accordingly, the defendant's motion thus fails to comply with the requirements of Title 28, and should thus be denied.
-    - The court finds that the defendant's actions were in violation of the California Penal Code, particularly Section 1234.
+    - The court finds that the defendant's actions were in violation of the California Penal Code, particularly Section 1234(a).
+    - This has many subsections: see  U.S.C., Title 28, section 1234(a)(3)(b).
 
     OUTPUT in this JSON format: {sentence_schema}
     """

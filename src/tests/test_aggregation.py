@@ -5,6 +5,7 @@ import pytest
 from src.benchmarking.temp_aggregation import (
     CaselawCitation,
     LabelPrediction,
+    StatuteCitation,
     aggregate_entities,
 )
 
@@ -371,5 +372,56 @@ def test_loop(labels: List[LabelPrediction], guid: str):
 
     assert cit.guid == guid
 
+@pytest.mark.parametrize(
+    ["labels", "correct"],
+    [
+        (
+            [
+                ("[CLS]", "O"),
+                ("of", "O"),
+                ("the", "O"),
+                ("2003", "O"),
+                ("amendment", "O"),
+                ("to", "O"),
+                ("section", "O"),
+                ("129", "B-SECTION"),
+                ("##40", "I-SECTION"),
+                (",", "O"),
+                ("subdivision", "O"),
+                ("(", "O"),
+                ("j", "I-SECTION"),
+                (")", "I-SECTION"),
+                ("(", "O"),
+                ("St", "B-COURT"),
+                ("##ats", "I-COURT"),
+                (".", "I-COURT"),
+                ("2003", "B-YEAR"),
+                (",", "O"),
+                ("ch", "O"),
+                (".", "O"),
+                ("67", "B-SECTION"),
+                ("##1", "I-PAGE"),
+                (",", "O"),
+                ("§", "O"),
+                ("1", "I-SECTION"),
+                (")", "I-SECTION"),
+                ("is", "O"),
+                ("uncertain", "O"),
+                (".", "O"),
+                ("[SEP]", "O"),
+            ],
+            StatuteCitation(section="12940(j)", year=2003),
+        )
+    ]
+)
+def test_statute(labels: List[LabelPrediction], correct: StatuteCitation):
+    ents = aggregate_entities(labels)
+    cit = StatuteCitation.from_token_label_pairs(ents)
+    assert cit
+
+    assert cit == correct
+
+
+    
 
 # def test_loop_null():

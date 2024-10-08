@@ -236,7 +236,7 @@ class CaselawCitation(BaseModel):
 
 class StatuteCitation(BaseModel):
     title: Optional[str] = None
-    code: str
+    code: Optional[str] = None
     section: Optional[str] = None
 
     year: Optional[int] = None
@@ -249,6 +249,7 @@ class StatuteCitation(BaseModel):
             self.title == other.title
             and self.code == other.code
             and self.section == other.section
+            and self.year == other.year
         )
 
     def __hash__(self):
@@ -287,6 +288,9 @@ class StatuteCitation(BaseModel):
                 section += token
             elif label == "YEAR":
                 year = int(token)
+
+        if len(code) == 0 and len(section) == 0:
+            return None
 
         return cls(title=title, code=code, section=section, year=year)
 

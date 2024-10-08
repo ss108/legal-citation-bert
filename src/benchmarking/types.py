@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Dict
 
-from beartype import beartype
 from pydantic import BaseModel
 
 
@@ -44,8 +42,6 @@ class CitationExtractionResult(BaseModel):
         return err_count
 
 
-@beartype
-@dataclass(frozen=True)
-class TestFile:
+class TestFile(BaseModel):
     file_text: str
     correct: CitationExtractionResult
