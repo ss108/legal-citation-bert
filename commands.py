@@ -1,10 +1,13 @@
 import asyncio
 import time
 from typing import List
+import torch
 
 import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
+from transformers import AutoModelForTokenClassification, AutoTokenizer
+
 from wasabi import msg
 
 from src.benchmarking.model import get_labels, get_model, split_text
@@ -175,6 +178,45 @@ def push_to_hub():
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
     tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
+
+
+@app.command()
+def test_from_hub():
+    # Load model and tokenizer from Hugging Face Hub
+    model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
+    tokenizer = AutoTokenizer.from_pretrained("ss108/legal-citation-bert")
+
+    DEVICE = torch.device("cuda")
+    model.to(DEVICE)
+
+    # Test with a sample input
+    test_text = "Fexler v. Hock, 123 U.S. 456, 499 (2021)"  # Sample text
+    sentences = split_text(test_text)
+    for s in sentences:
+        res = get_labels(s, model)
+        print(res)
+
+    return
+
+    # Tokenize input
+    tokenized_input = tokenizer(test_text, return_tensors="pt", padding=True)
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Perform inference (prediction)
+    with torch.no_grad():
+        outputs = model(**tokenized_input)
+        logits = outputs.logits
+        predictions = torch.argmax(logits, dim=-1)
+
+    # Get predicted labels
+    predicted_labels = [model.config.id2label[p.item()] for p in predictions[0]]
+    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])  # pyright: ignore
+
+    # Print tokens and their predicted labels
+    for token, label in zip(tokens, predicted_labels):
+        print(f"{token} -> {label}")
 
 
 if __name__ == "__main__":
