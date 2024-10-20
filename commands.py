@@ -181,6 +181,11 @@ def push_to_hub():
 
 
 @app.command()
+def hoi():
+    print("hoi")
+
+
+@app.command()
 def test_from_hub():
     # Load model and tokenizer from Hugging Face Hub
     model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
