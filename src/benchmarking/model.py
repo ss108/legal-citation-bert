@@ -12,16 +12,16 @@ from src.training.model import (
 from .temp_aggregation import LabelPrediction
 
 
-# def tokenize(
-#     s: str,
-# ) -> Dict[str, torch.Tensor]:  # actually a HF BatchEncoding object, a subclass of dict
-#     # but that class isn't great to work with from a typing perspective
-#     tokenizer: PreTrainedTokenizerFast = get_tokenizer()
-#     tokenized_input = tokenizer(s, return_tensors="pt", padding=True)  # pyright: ignore
-#     tokenized_input: Dict[str, torch.Tensor] = {
-#         k: v.to(DEVICE) for k, v in tokenized_input.items()
-#     }
-#     return tokenized_input
+def tokenize(
+    s: str,
+) -> Dict[str, torch.Tensor]:  # actually a HF BatchEncoding object, a subclass of dict
+    # but that class isn't great to work with from a typing perspective
+    tokenizer: PreTrainedTokenizerFast = get_tokenizer()
+    tokenized_input = tokenizer(s, return_tensors="pt", padding=True)  # pyright: ignore
+    tokenized_input: Dict[str, torch.Tensor] = {
+        k: v.to(DEVICE) for k, v in tokenized_input.items()
+    }
+    return tokenized_input
 
 
 def split_text(text: str) -> List[str]:
