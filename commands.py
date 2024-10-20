@@ -17,12 +17,12 @@ import typer
 #     aggregate_entities,
 #     citations_from,
 # )
-# from src.data.generate import (
-#     Sentence,
-#     generate_prose_statute_citation,
-#     generate_tags,
-#     generate_unofficial_citation,
-# )
+from src.data.generate import (
+    Sentence,
+    generate_prose_statute_citation,
+    # generate_tags,
+    # generate_unofficial_citation,
+)
 # from src.data.prepare import (
 #     RAW_DATA_DIR,
 #     create_candidate_dataset,
@@ -68,14 +68,11 @@ def gen_sentences():
 
 async def gen_prose_statute_data():
     res = await generate_prose_statute_citation(2)
-    # res: List[Sentence] = [
-    #     {
-    #         "text": "(§ 12940, subd. (j)(1); Carrisales v. Department of Corrections (1999) 21 Cal.4th 1132, 1136-1137 [90 Cal.Rptr.2d 804, 988 P.2d 1083].) In the",
-    #     }
-    # ]
-    data = await sents_to_data(res)
-    file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
-    await save_data_to_file(data, file_name)
+    print(res)
+
+    # data = await sents_to_data(res)
+    # file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
+    # await save_data_to_file(data, file_name)
 
 
 @app.command()

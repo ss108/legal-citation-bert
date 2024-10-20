@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, TypedDict, get_type_hints
 
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Sentence
 from src.openai import chat
-from src.training.model import ALL_LABELS
+# from src.training.model import ALL_LABELS
 
 sentence_schema = get_type_hints(Sentence)
 
@@ -55,7 +55,7 @@ async def _generate_long(n: int, type: CIT_TYPE = CIT_TYPE.CASE) -> List[Sentenc
     examples_map = EXAMPLES_MAP_CASE if type == CIT_TYPE.CASE else EXAMPLES_MAP_STATUTE
 
     PROMPT = f"""
-    GOAL: Generate a snippet from a fictitious legal motion containing an 
+    GOAL: Generate a snippet from a fictitious legal motion containing an
     American legal citation. The sentence will be used to train a NER model.
 
     The jurisdiction could be Federal or state, appellate or not.
@@ -187,8 +187,8 @@ async def generate_prose_statute_citation(n: int = 1) -> List[Sentence]:
             )
         )
 
-    raw_results = await asyncio.gather(*tasks)
-    formatted_results = []
+    raw_results = await asyncio.gather(*tasks) # type: ignore
+    formatted_results: List[Sentence] = []
 
     for r in raw_results:
         try:
@@ -217,7 +217,7 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     For Caselaw:
     CASE_NAME: Includes the names of both parties, plus the 'v.', and all other
     punctuation, e.g. 'People v. Jones'. Each token from 'People', 'v.'
-    (including the period), and 'Jones' is tagged as 'B-CASE_NAME' or 'I-CASE_NAME'. 
+    (including the period), and 'Jones' is tagged as 'B-CASE_NAME' or 'I-CASE_NAME'.
     VOLUME: The volume number of the reporter, e.g. '123'.
     REPORTER: The reporter abbreviation, e.g. 'F. 3d'.
     PAGE: The page number of the reporter on which the case starts, e.g. '456'.
@@ -232,7 +232,7 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     SECTION: All sections or subsections of the statute. E.g. '1234' in '28
     U.S.C. 1234', or '12(a)(3)' in 'Fed. R. Civ. P. 12(a)(3)'.
     Some of the citations may be written out instead of abbreviated per the Bluebook; for example, instead of 12 U.S.C. § 1234, the citation may be written as 'Section 1234 of Title 12 of the United States Code'.
-    
+
     Misc:
     ID: Used to label 'id' when it refers to the previous citation, e.g. Id. at
     87.
@@ -241,33 +241,33 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     FULL EXAMPLE: Text: 'Wowowowh. People v. Jones, 123 F. 3d 456 (S.D.N.Y. 1996)' \n
     Tokens: ["Wow", "##owo", "##wh", ".", "People", "v", ".", "Jones", ",",
     "123", "F.", "3", "##d", "456", "(", "S", ".", "D", ".", "N", ".", "Y", ".",
-    "1996", ")"] 
+    "1996", ")"]
     should be tagged as:
     Tags:  [
-    ("Wow", "O"), 
-    ("##owo", "O"), 
-    ("##wh", "O"), 
-    (".", "O"), 
-    ("People", "B-CASE_NAME"), 
-    ("v", "I-CASE_NAME"), 
-    (".", "I-CASE_NAME"), 
-    ("Jones", "I-CASE_NAME"), 
-    (",", "O"), 
-    ("123", "B-VOLUME"), 
-    ("F.", "B-REPORTER"), 
-    ("3", "I-REPORTER"), 
-    ("##d", "I-REPORTER"), 
-    ("456", "B-PAGE"), 
-    ("(", "O"), 
-    ("S", "B-COURT"), 
-    (".", "I-COURT"), 
-    ("D", "I-COURT"), 
-    (".", "I-COURT"), 
-    ("N", "I-COURT"), 
-    (".", "I-COURT"), 
-    ("Y", "I-COURT"), 
-    (".", "I-COURT"), 
-    ("1996", "B-YEAR"), 
+    ("Wow", "O"),
+    ("##owo", "O"),
+    ("##wh", "O"),
+    (".", "O"),
+    ("People", "B-CASE_NAME"),
+    ("v", "I-CASE_NAME"),
+    (".", "I-CASE_NAME"),
+    ("Jones", "I-CASE_NAME"),
+    (",", "O"),
+    ("123", "B-VOLUME"),
+    ("F.", "B-REPORTER"),
+    ("3", "I-REPORTER"),
+    ("##d", "I-REPORTER"),
+    ("456", "B-PAGE"),
+    ("(", "O"),
+    ("S", "B-COURT"),
+    (".", "I-COURT"),
+    ("D", "I-COURT"),
+    (".", "I-COURT"),
+    ("N", "I-COURT"),
+    (".", "I-COURT"),
+    ("Y", "I-COURT"),
+    (".", "I-COURT"),
+    ("1996", "B-YEAR"),
     (")", "O")
 ]
     \n
@@ -275,40 +275,40 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     Tokens: ['We', '##x', '##ler', '&', 'Greene', ',', 'LLC', 'v', '.', 'Lac', '##hs', ',', '250', 'Cal', '.', 'R', '##pt', '##r', '.', '3', '##d', '176', ',', '180', '(', 'Cal', '.', 'C', '##t', '.', 'A', '##pp', '.', '2008', ')']
     should be tagged as:
     Tags: [
-    ("W", "B-CASE_NAME"), 
-    ("##x", "I-CASE_NAME"), 
+    ("W", "B-CASE_NAME"),
+    ("##x", "I-CASE_NAME"),
     ("##ler", "I-CASE_NAME"),
-    ("&", "I-CASE_NAME"), 
-    ("Greene", "I-CASE_NAME"), 
-    (",", "I-CASE_NAME"), 
-    ("LLC", "I-CASE_NAME"), 
-    ("v", "I-CASE_NAME"), 
-    (".", "I-CASE_NAME"), 
+    ("&", "I-CASE_NAME"),
+    ("Greene", "I-CASE_NAME"),
+    (",", "I-CASE_NAME"),
+    ("LLC", "I-CASE_NAME"),
+    ("v", "I-CASE_NAME"),
+    (".", "I-CASE_NAME"),
     ("Lac", "I-CASE_NAME"),
-    ("##hs", "I-CASE_NAME"), 
-    (",", "O"), 
-    ("250", "B-VOLUME"), 
+    ("##hs", "I-CASE_NAME"),
+    (",", "O"),
+    ("250", "B-VOLUME"),
     ("Cal", "B-REPORTER"),
-    (".", "I-REPORTER"), 
-    ("R", "I-REPORTER"), 
-    ("##pt", "I-REPORTER"), 
-    ("##r", "I-REPORTER"), 
-    (".", "I-REPORTER"), 
+    (".", "I-REPORTER"),
+    ("R", "I-REPORTER"),
+    ("##pt", "I-REPORTER"),
+    ("##r", "I-REPORTER"),
+    (".", "I-REPORTER"),
     ("3", "I-REPORTER"),
-    ("##d", "I-REPORTER"), 
-    ("176", "B-PAGE"), 
-    (",", "O"), 
-    ("180", "B-PIN"), 
-    ("(", "O"), 
-    ("Cal", "B-COURT"), 
-    (".", "I-COURT"), 
-    ("C", "I-COURT"), 
-    ("##t", "I-COURT"), 
-    (".", "I-COURT"), 
+    ("##d", "I-REPORTER"),
+    ("176", "B-PAGE"),
+    (",", "O"),
+    ("180", "B-PIN"),
+    ("(", "O"),
+    ("Cal", "B-COURT"),
+    (".", "I-COURT"),
+    ("C", "I-COURT"),
+    ("##t", "I-COURT"),
+    (".", "I-COURT"),
     ("A", "I-COURT"),
-    ("##pp", "I-COURT"), 
-    (".", "I-COURT"), 
-    ("2008", "B-YEAR"), 
+    ("##pp", "I-COURT"),
+    (".", "I-COURT"),
+    ("2008", "B-YEAR"),
     (")", "O")
 ]
     \n
@@ -349,7 +349,7 @@ async def generate_tags(text: str, tokens: List[str]) -> Optional[TokenTags]:
     \n
     Output your response in the following JSON format:
     {get_type_hints(TokenTags)}
-    \n 
+    \n
     'tags' should be a list of tuples, where each tuple is a token and its label\n
     e.g. {{'tags': [('Wow', 'O'), ('ff', 'O'), ('word', 'O'), ('good', 'O'),
     ('People', 'B-CASE_NAME'), ('v', 'I-CASE_NAME'), ('.', 'I-CASE_NAME'),
