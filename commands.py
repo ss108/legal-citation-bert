@@ -57,9 +57,9 @@ from src.data.generate import (
 app = typer.Typer()
 
 
-@app.command()
-def save_ds():
-    save_cl_docket_entries_ds()
+# @app.command()
+# def save_ds():
+#     save_cl_docket_entries_ds()
 
 
 @app.command()
