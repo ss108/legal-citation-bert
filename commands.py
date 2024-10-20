@@ -1,58 +1,57 @@
 import asyncio
 import time
 from typing import List
-# import torch
+import torch
 
 import typer
 
-# from datasets import Dataset
-# from transformers import BertTokenizerFast
+from datasets import Dataset
+from transformers import BertTokenizerFast
 from transformers import (
     AutoModelForTokenClassification,
     BertTokenizerFast,
     AutoTokenizer,
 )
 
-# from wasabi import msg
+from wasabi import msg
 
-from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.model import get_labels, split_text
 
-# from src.benchmarking.temp_aggregation import (
-#     CaselawCitation,
-#     LabelPrediction,
-#     aggregate_entities,
-#     citations_from,
-# )
+from src.benchmarking.temp_aggregation import (
+    CaselawCitation,
+    LabelPrediction,
+    aggregate_entities,
+    citations_from,
+)
 from src.data.generate import (
     Sentence,
     generate_prose_statute_citation,
-    # generate_tags,
-    # generate_unofficial_citation,
+    generate_tags,
+    generate_unofficial_citation,
 )
-# from src.data.prepare import (
-#     RAW_DATA_DIR,
-#     create_candidate_dataset,
-#     delete_from_cache,
-#     do_sentences,
-#     gather_wrapper,
-#     load_candidate_ds,
-#     load_for_training,
-#     load_raw_cl_docket_entries_ds,
-#     process_cl_doc,
-#     save_cl_docket_entries_ds,
-#     save_data_to_file,
-#     sents_to_data,
-#     split_and_save,
-# )
-# from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
-# from src.training.model import (
-#     ALL_LABELS,
-#     MODEL_NAME,
-#     get_base_model,
-#     get_tokenizer,
-#     load_model_from_checkpoint,
-# )
-# from src.training.train import test_predict, train_model
+from src.data.prepare import (
+    RAW_DATA_DIR,
+    create_candidate_dataset,
+    delete_from_cache,
+    do_sentences,
+    gather_wrapper,
+    load_candidate_ds,
+    load_for_training,
+    load_raw_cl_docket_entries_ds,
+    process_cl_doc,
+    save_cl_docket_entries_ds,
+    save_data_to_file,
+    sents_to_data,
+    split_and_save,
+)
+from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
+from src.training.model import (
+    ALL_LABELS,
+    MODEL_NAME,
+    get_tokenizer,
+    load_model_from_checkpoint,
+)
+from src.training.train import test_predict, train_model
 
 app = typer.Typer()
 
@@ -74,11 +73,10 @@ def gen_sentences():
 
 async def gen_prose_statute_data():
     res = await generate_prose_statute_citation(2)
-    print(res)
 
-    # data = await sents_to_data(res)
-    # file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
-    # await save_data_to_file(data, file_name)
+    data = await sents_to_data(res)
+    file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
+    await save_data_to_file(data, file_name)
 
 
 @app.command()
@@ -142,19 +140,19 @@ def process_cl_docs():
     asyncio.run(gather_wrapper(tasks))
 
 
-@app.command()
-def test_model():
-    model = get_model()
+# @app.command()
+# def test_model():
+#     model = get_model()
 
-    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain."""
+#     text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain."""
 
-    sentences = split_text(text)
+#     sentences = split_text(text)
 
-    for s in sentences:
-        res = get_labels(s, model)
-        print(res)
-        f = citations_from(res)
-        print(f)
+#     for s in sentences:
+#         res = get_labels(s, model)
+#         print(res)
+#         f = citations_from(res)
+#         print(f)
 
 
 # @app.command()

@@ -6,7 +6,7 @@ from pathlib import Path
 from wasabi import msg
 
 from src.benchmarking.llm import llm_extract_citations_from_document
-from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.model import get_labels, split_text
 from src.benchmarking.temp_aggregation import citation_from
 from src.benchmarking.test_files.loader import get_test_data
 
@@ -43,24 +43,6 @@ def run_llm_extraction():
         # print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
 
-def run_model_extraction():
-    test_items = td.items()
-    model = get_model()
-
-    for file_name, data in test_items:
-        if file_name == "testerson_mctest":
-            continue
-
-        chunks = split_text(data.file_text)
-        for c in chunks:
-            msg.info(f"chunk: {c}")
-            res = get_labels(c, model)
-            c = citation_from(res)
-            print(c)
-            # print(res)
-
-
-run_model_extraction()
 # run_llm_extraction()
 
 # chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")

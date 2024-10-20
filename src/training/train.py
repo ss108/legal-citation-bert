@@ -5,7 +5,7 @@ import torch
 from datasets import Dataset, DatasetDict
 from transformers import EarlyStoppingCallback, Trainer, TrainingArguments
 
-from .model import get_base_model
+# from .model import get_base_model
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent.parent / "training_output"
 
