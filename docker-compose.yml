@@ -1,27 +1,28 @@
-version: '3.8'
-
 volumes:
   pdm_cache:
   nltk_data:
-  hf_cache:  
+  hf_cache:
 
 services:
   main:
     build: .
     volumes:
       - ./:/project
-      - hf_cache:/hf_cache  
+      - hf_cache:/hf_cache
       - nltk_data:/root/nltk_data
-    container_name: cit 
+    container_name: cit
     environment:
       - PDM_PYTHON=/usr/local/bin/python
-      - HF_HOME=/hf_cache  
+      - HF_HOME=/hf_cache
       - NLTK_DATA=/root/nltk_data
       - PYDEVD_DISABLE_FILE_VALIDATION=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
     deploy:
       resources:
         reservations:
           devices:
-          - driver: nvidia
-            count: all
-            capabilities: [gpu]
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

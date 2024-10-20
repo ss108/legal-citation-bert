@@ -1,39 +1,37 @@
 FROM huggingface/transformers-pytorch-gpu:latest as pytorch_stage 
-
 FROM python:3.11-slim as builder
+COPY --from=ghcr.io/astral-sh/uv:0.3.3 /uv /bin/uv
 
 WORKDIR /project
 
 
-COPY docker-entrypoint.sh /project/docker-entrypoint.sh
-
-ENV PDM_HOME=/root/.pdm
-
-RUN apt-get update \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    gnupg \
+    && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
+    && echo "deb http://apt.llvm.org/bullseye/ llvm-10 main" > /etc/apt/sources.list.d/llvm.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
     gcc \
     libc6-dev \
+    llvm-10 \
+    llvm-10-dev \
+    libffi-dev \
+    build-essential \
+    # Create a symbolic link for llvm-config to point to llvm-config-10
+    && ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config \
+    # Clean up APT lists to reduce image size
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -U pip setuptools wheel
-RUN pip install pdm
-RUN pdm install --global --project .
-RUN pdm add torch --global 
+COPY . . 
 
-RUN pip install spacy 
-RUN python -m spacy download en_core_web_sm
-# Spacy has issues being installed via PDM
+ENV LLVM_CONFIG=/usr/bin/llvm-config-10
 
-RUN pip install notebook
-RUN pip install jupyterlab
+# (Optional) If you need to install specific Python packages or download resources, uncomment and modify as needed
+# RUN pip install spacy 
+# RUN python -m spacy download en_core_web_sm
+# # Spacy has issues being installed via PDM
 
-RUN jupyter notebook --generate-config
-
-ENV JUPYTER_ENABLE_LAB=yes
-
-COPY ./setup/00_setup.py /root/.ipython/profile_default/startup/00_setup.py
-
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--port=8888", "--no-browser"]
-EXPOSE 8888
+RUN uv sync --dev
 
 ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
