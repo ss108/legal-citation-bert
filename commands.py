@@ -4,13 +4,19 @@ from typing import List
 # import torch
 
 import typer
+
 # from datasets import Dataset
 # from transformers import BertTokenizerFast
-# from transformers import AutoModelForTokenClassification, AutoTokenizer
+from transformers import (
+    AutoModelForTokenClassification,
+    BertTokenizerFast,
+    AutoTokenizer,
+)
 
 # from wasabi import msg
 
-# from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.model import get_labels, get_model, split_text
+
 # from src.benchmarking.temp_aggregation import (
 #     CaselawCitation,
 #     LabelPrediction,
@@ -187,9 +193,6 @@ def test_from_hub():
     # Load model and tokenizer from Hugging Face Hub
     model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
     tokenizer = AutoTokenizer.from_pretrained("ss108/legal-citation-bert")
-
-    DEVICE = torch.device("cuda")
-    model.to(DEVICE)
 
     # Test with a sample input
     test_text = "Fexler v. Hock, 123 U.S. 456, 499 (2021)"  # Sample text

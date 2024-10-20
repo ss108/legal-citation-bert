@@ -1,36 +1,27 @@
 from typing import Dict, List
 
 import spacy
-import torch
 from transformers import AutoModelForTokenClassification, PreTrainedTokenizerFast
 
 from src.training.model import (
     ALL_LABELS,
     get_tokenizer,
-    load_model_from_checkpoint,
+    # load_model_from_checkpoint,
 )
 
 from .temp_aggregation import LabelPrediction
 
-DEVICE = torch.device("cuda")
 
-
-def get_model():
-    model = load_model_from_checkpoint()
-    model = model.to(DEVICE)  # pyright: ignore
-    return model
-
-
-def tokenize(
-    s: str,
-) -> Dict[str, torch.Tensor]:  # actually a HF BatchEncoding object, a subclass of dict
-    # but that class isn't great to work with from a typing perspective
-    tokenizer: PreTrainedTokenizerFast = get_tokenizer()
-    tokenized_input = tokenizer(s, return_tensors="pt", padding=True)  # pyright: ignore
-    tokenized_input: Dict[str, torch.Tensor] = {
-        k: v.to(DEVICE) for k, v in tokenized_input.items()
-    }
-    return tokenized_input
+# def tokenize(
+#     s: str,
+# ) -> Dict[str, torch.Tensor]:  # actually a HF BatchEncoding object, a subclass of dict
+#     # but that class isn't great to work with from a typing perspective
+#     tokenizer: PreTrainedTokenizerFast = get_tokenizer()
+#     tokenized_input = tokenizer(s, return_tensors="pt", padding=True)  # pyright: ignore
+#     tokenized_input: Dict[str, torch.Tensor] = {
+#         k: v.to(DEVICE) for k, v in tokenized_input.items()
+#     }
+#     return tokenized_input
 
 
 def split_text(text: str) -> List[str]:

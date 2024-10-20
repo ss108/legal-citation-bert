@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-import torch
+# import torch
 from transformers import (
     AutoConfig,
     AutoModelForTokenClassification,
@@ -12,19 +12,18 @@ from wasabi import msg
 from src.training.constants import ALL_LABELS, MODEL_NAME
 
 
+# def get_base_model():
+#     # Load the configuration from the pre-trained model
+#     config = AutoConfig.from_pretrained(MODEL_NAME)
 
-def get_base_model():
-    # Load the configuration from the pre-trained model
-    config = AutoConfig.from_pretrained(MODEL_NAME)
+#     # Create the model with the original configuration
+#     model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME, config=config)
 
-    # Create the model with the original configuration
-    model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME, config=config)
+#     # Modify the classifier to match the number of your labels
+#     model.classifier = torch.nn.Linear(config.hidden_size, len(ALL_LABELS))
+#     model.num_labels = len(ALL_LABELS)
 
-    # Modify the classifier to match the number of your labels
-    model.classifier = torch.nn.Linear(config.hidden_size, len(ALL_LABELS))
-    model.num_labels = len(ALL_LABELS)
-
-    return model
+#     return model
 
 
 def get_tokenizer() -> PreTrainedTokenizerFast:
