@@ -5,6 +5,7 @@ import pytest
 from src.benchmarking.temp_aggregation import (
     CaselawCitation,
     LabelPrediction,
+    StatuteCitation,
     aggregate_entities,
 )
 
@@ -202,6 +203,18 @@ def test_agg_full_case(labels: List[LabelPrediction], expected: List[LabelPredic
             ],
             "12 F.Supp. 10",
         ),
+        (
+            [
+                LabelPrediction(token="garbage", label="O"),
+                LabelPrediction(token="Angel v. Eva-002", label="CASE_NAME"),
+                LabelPrediction(token="12", label="VOLUME"),
+                LabelPrediction(token="F.Supp.", label="REPORTER"),
+                LabelPrediction(token="10", label="PAGE"),
+                LabelPrediction(token="19", label="PIN"),
+                LabelPrediction(token="19BLAHFH", label="O"),
+            ],
+            "12 F.Supp. 10",
+        ),
     ],
 )
 def test_full_cite_guid(labels: List[LabelPrediction], expected: str):
@@ -209,3 +222,206 @@ def test_full_cite_guid(labels: List[LabelPrediction], expected: str):
 
     assert cit, "Citation should not be None"
     assert cit.guid == expected
+
+
+@pytest.mark.parametrize(
+    ["labels", "guid"],
+    [
+        (
+            [
+                LabelPrediction(token="[CLS]", label="O"),
+                LabelPrediction(token="Virgin", label="B-CASE_NAME"),
+                LabelPrediction(token="Enterprises", label="I-CASE_NAME"),
+                LabelPrediction(token="Ltd", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token="v", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token="Na", label="I-CASE_NAME"),
+                LabelPrediction(token="##wab", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="335", label="B-VOLUME"),
+                LabelPrediction(token="F", label="B-REPORTER"),
+                LabelPrediction(token=".", label="I-REPORTER"),
+                LabelPrediction(token="3", label="I-REPORTER"),
+                LabelPrediction(token="##d", label="I-REPORTER"),
+                LabelPrediction(token="141", label="B-PAGE"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="147", label="B-PIN"),
+                LabelPrediction(token="(", label="O"),
+                LabelPrediction(token="2d", label="B-COURT"),
+                LabelPrediction(token="C", label="I-COURT"),
+                LabelPrediction(token="##ir", label="I-COURT"),
+                LabelPrediction(token=".", label="I-COURT"),
+                LabelPrediction(token="2003", label="B-YEAR"),
+                LabelPrediction(token=")", label="O"),
+                LabelPrediction(token=".", label="O"),
+                LabelPrediction(token="[SEP]", label="I-CASE_NAME"),
+            ],
+            "335 F.3d 141",
+        ),
+        (
+            [
+                LabelPrediction(token="[CLS]", label="O"),
+                LabelPrediction(token='"', label="O"),
+                LabelPrediction(token="Con", label="O"),
+                LabelPrediction(token="##fusion", label="O"),
+                LabelPrediction(token='"', label="O"),
+                LabelPrediction(token="in", label="O"),
+                LabelPrediction(token="this", label="O"),
+                LabelPrediction(token="context", label="O"),
+                LabelPrediction(token="is", label="O"),
+                LabelPrediction(token="not", label="O"),
+                LabelPrediction(token="limited", label="O"),
+                LabelPrediction(token="to", label="O"),
+                LabelPrediction(token="a", label="O"),
+                LabelPrediction(token="mistaken", label="O"),
+                LabelPrediction(token="belief", label="O"),
+                LabelPrediction(token="among", label="O"),
+                LabelPrediction(token="consumers", label="O"),
+                LabelPrediction(token="that", label="O"),
+                LabelPrediction(token="the", label="O"),
+                LabelPrediction(token="plaintiff", label="O"),
+                LabelPrediction(token="is", label="O"),
+                LabelPrediction(token="the", label="O"),
+                LabelPrediction(token="producer", label="O"),
+                LabelPrediction(token="of", label="O"),
+                LabelPrediction(token="the", label="O"),
+                LabelPrediction(token="defendant", label="O"),
+                LabelPrediction(token="", label="O"),
+                LabelPrediction(token="s", label="O"),
+                LabelPrediction(token="goods", label="O"),
+                LabelPrediction(token=".", label="O"),
+                LabelPrediction(token="Star", label="B-CASE_NAME"),
+                LabelPrediction(token="##bu", label="I-CASE_NAME"),
+                LabelPrediction(token="##cks", label="I-CASE_NAME"),
+                LabelPrediction(token="Corp", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token="v", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token="Wolfe", label="I-CASE_NAME"),
+                LabelPrediction(
+                    token="'",
+                    label="I-CASE_NAME",
+                ),
+                LabelPrediction(token="s", label="I-CASE_NAME"),
+                LabelPrediction(token="Borough", label="I-CASE_NAME"),
+                LabelPrediction(token="Coffee", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="I-CASE_NAME"),
+                LabelPrediction(token="Inc", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="58", label="B-VOLUME"),
+                LabelPrediction(token="##8", label="I-VOLUME"),
+                LabelPrediction(token="F", label="B-REPORTER"),
+                LabelPrediction(token=".", label="I-REPORTER"),
+                LabelPrediction(token="3", label="I-REPORTER"),
+                LabelPrediction(token="##d", label="I-REPORTER"),
+                LabelPrediction(token="97", label="B-PAGE"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="114", label="B-PIN"),
+                LabelPrediction(token="(", label="O"),
+                LabelPrediction(token="2d", label="B-COURT"),
+                LabelPrediction(token="C", label="I-COURT"),
+                LabelPrediction(token="##ir", label="I-COURT"),
+                LabelPrediction(token=".", label="I-COURT"),
+                LabelPrediction(token="2009", label="B-YEAR"),
+                LabelPrediction(token=")", label="O"),
+                LabelPrediction(token=".", label="O"),
+                LabelPrediction(token="[SEP]", label="O"),
+            ],
+            "588 F.3d 97",
+        ),
+        (
+            [
+                LabelPrediction(token="[CLS]", label="O"),
+                LabelPrediction(token="In", label="O"),
+                LabelPrediction(token="Smith", label="B-CASE_NAME"),
+                LabelPrediction(token="v", label="I-CASE_NAME"),
+                LabelPrediction(token=".", label="I-CASE_NAME"),
+                LabelPrediction(token="City", label="I-CASE_NAME"),
+                LabelPrediction(token="of", label="I-CASE_NAME"),
+                LabelPrediction(token="Los", label="I-CASE_NAME"),
+                LabelPrediction(token="Angeles", label="I-CASE_NAME"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="123", label="B-VOLUME"),
+                LabelPrediction(token="F", label="B-REPORTER"),
+                LabelPrediction(token=".", label="I-REPORTER"),
+                LabelPrediction(token="3", label="I-REPORTER"),
+                LabelPrediction(token="##d", label="I-REPORTER"),
+                LabelPrediction(token="45", label="B-PAGE"),
+                LabelPrediction(token="##6", label="I-PAGE"),
+                LabelPrediction(token=",", label="O"),
+                LabelPrediction(token="45", label="B-PIN"),
+                LabelPrediction(token="##9", label="I-PIN"),
+                LabelPrediction(token="(", label="O"),
+                LabelPrediction(token="9th", label="B-COURT"),
+                LabelPrediction(token="C", label="I-COURT"),
+                LabelPrediction(token="##ir", label="I-COURT"),
+                LabelPrediction(token=".", label="I-COURT"),
+                LabelPrediction(token="2000", label="B-YEAR"),
+                LabelPrediction(token=")", label="O"),
+            ],
+            "123 F.3d 456",
+        ),
+    ],
+)
+def test_loop(labels: List[LabelPrediction], guid: str):
+    ents = aggregate_entities(labels)
+    cit = CaselawCitation.from_token_label_pairs(ents)
+    assert cit
+
+    assert cit.guid == guid
+
+@pytest.mark.parametrize(
+    ["labels", "correct"],
+    [
+        (
+            [
+                ("[CLS]", "O"),
+                ("of", "O"),
+                ("the", "O"),
+                ("2003", "O"),
+                ("amendment", "O"),
+                ("to", "O"),
+                ("section", "O"),
+                ("129", "B-SECTION"),
+                ("##40", "I-SECTION"),
+                (",", "O"),
+                ("subdivision", "O"),
+                ("(", "O"),
+                ("j", "I-SECTION"),
+                (")", "I-SECTION"),
+                ("(", "O"),
+                ("St", "B-COURT"),
+                ("##ats", "I-COURT"),
+                (".", "I-COURT"),
+                ("2003", "B-YEAR"),
+                (",", "O"),
+                ("ch", "O"),
+                (".", "O"),
+                ("67", "B-SECTION"),
+                ("##1", "I-PAGE"),
+                (",", "O"),
+                ("§", "O"),
+                ("1", "I-SECTION"),
+                (")", "I-SECTION"),
+                ("is", "O"),
+                ("uncertain", "O"),
+                (".", "O"),
+                ("[SEP]", "O"),
+            ],
+            StatuteCitation(section="12940(j)", year=2003),
+        )
+    ]
+)
+def test_statute(labels: List[LabelPrediction], correct: StatuteCitation):
+    ents = aggregate_entities(labels)
+    cit = StatuteCitation.from_token_label_pairs(ents)
+    assert cit
+
+    assert cit == correct
+
+
+    
+
+# def test_loop_null():

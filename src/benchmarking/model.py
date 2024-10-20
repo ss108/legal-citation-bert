@@ -63,7 +63,11 @@ def get_labels(
     tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])  # pyright: ignore
 
     res = []
+    raw_pairs = []
     for token, label in zip(tokens, predicted_labels):
+        raw_pairs.append((token, label))
         res.append(LabelPrediction(token=token, label=label))
+
+    print(raw_pairs)
 
     return res

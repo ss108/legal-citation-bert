@@ -1,12 +1,30 @@
 import asyncio
-
+import time
+from typing import List
 import torch
+
 import typer
 from datasets import Dataset
 from transformers import BertTokenizerFast
+from transformers import AutoModelForTokenClassification, AutoTokenizer
 
-from src.data.generate import generate_tags, generate_unofficial_citation
+from wasabi import msg
+
+from src.benchmarking.model import get_labels, get_model, split_text
+from src.benchmarking.temp_aggregation import (
+    CaselawCitation,
+    LabelPrediction,
+    aggregate_entities,
+    citations_from,
+)
+from src.data.generate import (
+    Sentence,
+    generate_prose_statute_citation,
+    generate_tags,
+    generate_unofficial_citation,
+)
 from src.data.prepare import (
+    RAW_DATA_DIR,
     create_candidate_dataset,
     delete_from_cache,
     do_sentences,
@@ -16,6 +34,8 @@ from src.data.prepare import (
     load_raw_cl_docket_entries_ds,
     process_cl_doc,
     save_cl_docket_entries_ds,
+    save_data_to_file,
+    sents_to_data,
     split_and_save,
 )
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs
@@ -38,10 +58,24 @@ def save_ds():
 
 @app.command()
 def gen_sentences():
-    args = DataGenerationArgs(
-        cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
-    )
-    asyncio.run(do_sentences(args))  # pyright: ignore
+    # args = DataGenerationArgs(
+    #     cit_form=CIT_FORM.SHORT, cit_type=CIT_TYPE.CASE, number=20
+    # )
+    # asyncio.run(do_sentences(args))  # pyright: ignore
+
+    asyncio.run(gen_prose_statute_data())
+
+
+async def gen_prose_statute_data():
+    res = await generate_prose_statute_citation(2)
+    # res: List[Sentence] = [
+    #     {
+    #         "text": "(§ 12940, subd. (j)(1); Carrisales v. Department of Corrections (1999) 21 Cal.4th 1132, 1136-1137 [90 Cal.Rptr.2d 804, 988 P.2d 1083].) In the",
+    #     }
+    # ]
+    data = await sents_to_data(res)
+    file_name = f"{RAW_DATA_DIR}/prose_statutes_{int(time.time())}.jsonl"
+    await save_data_to_file(data, file_name)
 
 
 @app.command()
@@ -56,13 +90,8 @@ def delete_cached_file(name: str):
 
 
 @app.command()
-def store_model():
-    get_base_model()
-
-
-@app.command()
-def prepare_candidate_dataset():
-    create_candidate_dataset()
+def prepare_candidate_dataset(version: str = "v0"):
+    create_candidate_dataset(version)
 
 
 @app.command()
@@ -72,15 +101,22 @@ def save_hf_ds(version: str = "v0"):
 
 
 @app.command()
-def save_training_ds(version: str = "v0"):
+def create_and_save_ds(version: str = "v0"):
     create_candidate_dataset(version)
+    split_and_save_ds(version)
+    # ds = load_candidate_ds(version)
+    # split_and_save(ds, version)
+
+
+@app.command()
+def split_and_save_ds(version: str = "v0"):
     ds = load_candidate_ds(version)
     split_and_save(ds, version)
 
 
 @app.command()
-def train():
-    ds = load_for_training()
+def train(version: str = "v0"):
+    ds = load_for_training(version)
     _, trainer = train_model(ds)
     test_predict(trainer, ds["test"])
 
@@ -104,54 +140,83 @@ def process_cl_docs():
 
 
 @app.command()
-def test_mistral_labeling():
-    text = "The quick brown fox jumps over the lazy dog. Hox v. Doe, 123 U.S. 456, 499 (2021)."
-    tokenizer = get_tokenizer()
-
-    tokens = tokenizer.tokenize(text)
-    res = asyncio.run(generate_tags(text, tokens))
-    print(res)
-
-
-@app.command()
 def test_model():
-    device = torch.device("cuda")
-    model = load_model_from_checkpoint()
-    model = model.to(device)  # pyright: ignore
-    # print(model)
+    model = get_model()
 
-    tokenizer = get_tokenizer()
-    text = """warrants similar to the one at issue here. (Opp'n at 9-10.) See, e.g., United States v. Westley, No. 17-CR-171 (MPS), 2018 WL 3448161, at *12 (D. Conn. July 17, 2018) (in upholding Facebook warrant, equating Facebook information to other "electronic evidence" and asserting that "extremely broad" disclosure is a "practical necessity when dealing with electronic evidence");"""
+    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain."""
 
-    tokenized_input = tokenizer(text, return_tensors="pt", padding=True)
-    tokenized_input = {k: v.to(device) for k, v in tokenized_input.items()}
+    sentences = split_text(text)
 
-    model.eval()
+    for s in sentences:
+        res = get_labels(s, model)
+        print(res)
+        f = citations_from(res)
+        print(f)
 
-    with torch.no_grad():
-        outputs = model(**tokenized_input)
-        logits = outputs.logits
-        predictions = torch.argmax(logits, dim=-1)
 
-    predicted_labels = [ALL_LABELS[p] for p in predictions[0].tolist()]
-    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])
+# @app.command()
+# def test_model_agg():
+#     model = get_model()
 
-    for token, label in zip(tokens, predicted_labels):
-        print(f"{token} - {label}")
+#     text = """ The confusion
+# could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the
+# plaintiff’s reputation by association with the defendant and"""
+
+#     sentences = split_text(text)
+
+#     for s in sentences:
+#         res = get_labels(s, model)
+#         cits = citations_from(res)
+#         if len(cits) > 0:
+#             print(cits)
 
 
 @app.command()
 def push_to_hub():
     model = load_model_from_checkpoint()
-    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+    model.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
-    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)
+    tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
 
 
 @app.command()
-def hi():
-    print("hi")
+def test_from_hub():
+    # Load model and tokenizer from Hugging Face Hub
+    model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
+    tokenizer = AutoTokenizer.from_pretrained("ss108/legal-citation-bert")
+
+    DEVICE = torch.device("cuda")
+    model.to(DEVICE)
+
+    # Test with a sample input
+    test_text = "Fexler v. Hock, 123 U.S. 456, 499 (2021)"  # Sample text
+    sentences = split_text(test_text)
+    for s in sentences:
+        res = get_labels(s, model)
+        print(res)
+
+    return
+
+    # Tokenize input
+    tokenized_input = tokenizer(test_text, return_tensors="pt", padding=True)
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Perform inference (prediction)
+    with torch.no_grad():
+        outputs = model(**tokenized_input)
+        logits = outputs.logits
+        predictions = torch.argmax(logits, dim=-1)
+
+    # Get predicted labels
+    predicted_labels = [model.config.id2label[p.item()] for p in predictions[0]]
+    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])  # pyright: ignore
+
+    # Print tokens and their predicted labels
+    for token, label in zip(tokens, predicted_labels):
+        print(f"{token} -> {label}")
 
 
 if __name__ == "__main__":

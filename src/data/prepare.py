@@ -1,6 +1,6 @@
 import asyncio
-import shutil
 import glob
+import shutil
 import time
 from pathlib import Path
 from typing import Dict, List
@@ -29,9 +29,21 @@ async def do_sentences(a: DataGenerationArgs):
 
     data: List[Datum] = await sents_to_data(res)
 
-    df = pd.DataFrame([x.dict() for x in data])
     file_name = f"{RAW_DATA_DIR}/sentences_gen_{a.cit_type.name}_{a.cit_form.name}_{int(time.time())}.jsonl"
 
+    df = pd.DataFrame([x.dict() for x in data])
+
+    msg.info(f"Saving to {file_name}")
+
+    df.to_json(
+        file_name,
+        orient="records",
+        lines=True,
+    )
+
+
+async def save_data_to_file(data: List[Datum], file_name: str):
+    df = pd.DataFrame([x.dict() for x in data])
     msg.info(f"Saving to {file_name}")
 
     df.to_json(
@@ -162,6 +174,9 @@ def get_jsonl_files():
 
 
 def create_candidate_dataset(version="v0"):
+    version_dir_path = Path(f"{PREPARED_DATA_DIR}/{version}")
+    version_dir_path.mkdir(parents=True, exist_ok=True)
+
     jsonl_files = get_jsonl_files()
     combined_df = pd.DataFrame()  # Start with an empty dataframe
     dfs = []
@@ -189,7 +204,7 @@ def create_candidate_dataset(version="v0"):
 
     combined_df = pd.concat(dfs, ignore_index=True)
     combined_df.to_json(
-        f"{PREPARED_DATA_DIR}/{version}/candidate.jsonl",
+        f"{version_dir_path}/candidate.jsonl",
         orient="records",
         lines=True,
     )

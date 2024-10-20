@@ -16,7 +16,7 @@ dependencies = [
     "scikit-learn>=1.4.1.post1",
     "numpy>=1.26.4",
     "torch>=2.3.0",
-    "pandas>=2.2.1",
+    "pandas>=2.2.3",
     "python-dotenv>=1.0.1",
     "mistralai>=0.1.8",
     "outlines>=0.0.39",
@@ -29,6 +29,7 @@ dependencies = [
     "beartype>=0.18.5",
     "pymupdf>=1.24.5",
     "more-itertools>=10.3.0",
+    "debugpy>=1.8.2",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"

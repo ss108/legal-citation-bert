@@ -59,9 +59,7 @@ def train_model(ds_dict: DatasetDict):
         torch.cuda.set_device(device_index)  # Set the default CUDA device by index
         print(f"Using GPU: {torch.cuda.get_device_name(device_index)}")
     else:
-        raise EnvironmentError(
-            "No GPU found! Make sure the training is supposed to run on a GPU."
-        )
+        raise EnvironmentError("No GPU found!")
 
     model = get_base_model()
 

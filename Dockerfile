@@ -24,4 +24,16 @@ RUN pip install spacy
 RUN python -m spacy download en_core_web_sm
 # Spacy has issues being installed via PDM
 
+RUN pip install notebook
+RUN pip install jupyterlab
+
+RUN jupyter notebook --generate-config
+
+ENV JUPYTER_ENABLE_LAB=yes
+
+COPY ./setup/00_setup.py /root/.ipython/profile_default/startup/00_setup.py
+
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--port=8888", "--no-browser"]
+EXPOSE 8888
+
 ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]

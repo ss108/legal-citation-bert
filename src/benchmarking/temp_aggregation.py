@@ -9,6 +9,9 @@ from __future__ import annotations
 from typing import List, NamedTuple, Optional, Protocol, Tuple, Type, TypeAlias
 
 from pydantic import BaseModel
+from wasabi import msg
+
+from .types import CitationExtractionResult
 
 PIN_CITE: TypeAlias = Tuple[int, Optional[int]]
 
@@ -17,7 +20,7 @@ class LabelPrediction(NamedTuple):
     token: str
     label: str
 
-    def __repr__(self):
+    def __str__(self):
         return f"{self.token}: {self.label}"
 
     def __eq__(self, value: object) -> bool:
@@ -36,25 +39,65 @@ class ICitation(Protocol):
     @property
     def full_text(self) -> str: ...
 
+    def __hash__(self) -> int: ...
+
+    def __eq__(self, other: object) -> bool: ...
+
+
+def citations_from(token_label_pairs: List[LabelPrediction]) -> List[ICitation]:
+    CIT_START_LABELS = ["B-TITLE", "B-CODE", "B-SECTION", "B-CASE_NAME", "B-VOLUME"]
+    grouped = []
+
+    current_start = 0
+    for i, label in enumerate(token_label_pairs):
+        if label.label in CIT_START_LABELS:
+            current_start = i
+
+            previous = token_label_pairs[:current_start]
+            if len(previous) > 0:
+                grouped.append(previous)
+
+    if current_start != 0 and len(grouped) == 0:
+        grouped.append(token_label_pairs)
+
+    citations = [citation_from(group) for group in grouped]
+    return [c for c in citations if c is not None]
+
 
 def citation_from(token_label_pairs: List[LabelPrediction]) -> Optional[ICitation]:
-    labels_only = [pair.label for pair in token_label_pairs]
+    citation_start_index = None
+
+    for i, label in enumerate(token_label_pairs):
+        if label.label != "O":
+            citation_start_index = i
+            break
+
+    if not citation_start_index:
+        return None
+
+    labels_only = [pair.label for pair in token_label_pairs[citation_start_index:]]
+
+    if len(labels_only) == 0:
+        return None
 
     citation_class: Optional[Type[ICitation]] = None
 
-    match labels_only:
-        case ["B-TITLE", *rest]:
-            ...
-            # citation_class = StatuteCitation
-        case ["B-CASE_NAME", *rest]:  # noqa
+    # msg.info(labels_only)
+
+    first_label = labels_only[0]
+
+    match first_label:
+        case "B-TITLE" | "B-CODE" | "B-SECTION":
+            citation_class = StatuteCitation
+        case "B-CASE_NAME" | "B-VOLUME":
             citation_class = CaselawCitation
         case _:
             return None
 
-    if not citation_class:
-        return None
+    aggregated = aggregate_entities(token_label_pairs[citation_start_index:])
 
-    citation_class.from_token_label_pairs(token_label_pairs)
+    o = citation_class.from_token_label_pairs(aggregated)
+    return o
 
 
 class CaselawCitation(BaseModel):
@@ -131,10 +174,24 @@ class CaselawCitation(BaseModel):
 
         return " ".join(components)
 
+    def __eq__(self, other):
+        if not isinstance(other, CaselawCitation):
+            return False
+
+        return (
+            self.case_name == other.case_name
+            and self.volume == other.volume
+            and self.reporter == other.reporter
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.case_name, self.volume, self.reporter))
+
     @classmethod
     def from_token_label_pairs(
         cls, token_label_pairs: List[LabelPrediction]
     ) -> Optional[CaselawCitation]:
+        msg.info(f"Processing: {token_label_pairs}")
         case_name = ""
         volume = None
         reporter = ""
@@ -163,6 +220,7 @@ class CaselawCitation(BaseModel):
                 year = int(token)
 
         if volume is None:
+            msg.fail("No volume found")
             return None
 
         return cls(
@@ -177,11 +235,25 @@ class CaselawCitation(BaseModel):
 
 
 class StatuteCitation(BaseModel):
-    title: Optional[str]
-    code: str
-    section: Optional[str]
+    title: Optional[str] = None
+    code: Optional[str] = None
+    section: Optional[str] = None
 
-    year: Optional[int]
+    year: Optional[int] = None
+
+    def __eq__(self, other):
+        if not isinstance(other, StatuteCitation):
+            return False
+
+        return (
+            self.title == other.title
+            and self.code == other.code
+            and self.section == other.section
+            and self.year == other.year
+        )
+
+    def __hash__(self):
+        return hash((self.title, self.code, self.section))
 
     @property
     def full_text(self) -> str:
@@ -197,6 +269,30 @@ class StatuteCitation(BaseModel):
             components.append(self.section)
 
         return " ".join(components)
+
+    @classmethod
+    def from_token_label_pairs(
+        cls, token_label_pairs: List[LabelPrediction]
+    ) -> Optional[StatuteCitation]:
+        title = None
+        code = ""
+        section = ""
+        year = None
+
+        for token, label in token_label_pairs:
+            if label == "TITLE":
+                title = token
+            elif label == "CODE":
+                code += token
+            elif label == "SECTION":
+                section += token
+            elif label == "YEAR":
+                year = int(token)
+
+        if len(code) == 0 and len(section) == 0:
+            return None
+
+        return cls(title=title, code=code, section=section, year=year)
 
 
 def _process_label(label: str) -> str:
@@ -221,12 +317,16 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
     E.g. a series of tokens with labels like: B-CASE_NAME, I-CASE_NAME,
     I_CASE_NAME should all be aggregated into one LabelPrediction with label CASE_NAME
     """
+    # TODO: Revisit this; unclear why couldn't achieve the goal in the `from_token_label_pairs` methods
     aggregated: List[LabelPrediction] = []
 
     current_entity = ""
     current_label = ""
 
     for token, label in labels:
+        if len(token) == 0:
+            continue
+
         if token[0].isupper() and len(current_entity) > 0 and "CASE_NAME" in label:
             token = f" {token}"
 
@@ -253,3 +353,8 @@ def aggregate_entities(labels: List[LabelPrediction]) -> List[LabelPrediction]:
         aggregated.append(LabelPrediction(token=current_entity, label=current_label))
 
     return aggregated
+
+
+def to_citation_extraction_res(cits: List[ICitation]) -> CitationExtractionResult:
+    # full =
+    ...
