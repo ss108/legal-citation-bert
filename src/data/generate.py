@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, TypedDict, get_type_hints
 
 from src.data.types import CIT_FORM, CIT_TYPE, DataGenerationArgs, Sentence
 from src.openai import chat
-from src.training.model import ALL_LABELS
+from src.training.constants import ALL_LABELS
 
 sentence_schema = get_type_hints(Sentence)
 
@@ -187,7 +187,7 @@ async def generate_prose_statute_citation(n: int = 1) -> List[Sentence]:
             )
         )
 
-    raw_results = await asyncio.gather(*tasks) # type: ignore
+    raw_results = await asyncio.gather(*tasks)  # type: ignore
     formatted_results: List[Sentence] = []
 
     for r in raw_results:

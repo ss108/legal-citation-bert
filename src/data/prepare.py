@@ -10,7 +10,8 @@ import spacy
 from datasets import Dataset, DatasetDict, load_dataset
 from wasabi import msg
 
-from src.training.model import LABEL_MAP, get_tokenizer
+from src.training.model import get_tokenizer
+from src.training.constants import LABEL_MAP
 
 from .generate import generate, generate_tags
 from .manage_datasets import (
