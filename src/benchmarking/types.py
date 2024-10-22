@@ -40,8 +40,3 @@ class CitationExtractionResult(BaseModel):
                 err_count += abs(correct_count - response_count)
 
         return err_count
-
-
-class TestFile(BaseModel):
-    file_text: str
-    correct: CitationExtractionResult

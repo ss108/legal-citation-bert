@@ -1,35 +1,12 @@
 import asyncio
-import importlib.util
-import sys
-from pathlib import Path
 
 from wasabi import msg
 
 from src.benchmarking.llm import llm_extract_citations_from_document
-from src.benchmarking.test_files.loader import get_test_data
-
-TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
-
-
-def load_module_from_file(file_path: str):
-    module_name = Path(file_path).stem
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    if spec and spec.loader:
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-        return module
-    return None
-
-
-td = get_test_data()
 
 
 def run_llm_extraction():
     for file_name, data in td.items():
-        if file_name != "testerson_mctest":
-            continue
-
         res = asyncio.run(llm_extract_citations_from_document(data.file_text))
         msg.info("final res")
         print(res.sort())
@@ -47,3 +24,23 @@ run_llm_extraction()
 #     print(c)
 #     predictions = get_labels(c, model)
 #     print(predictions)
+
+"""
+from src.benchmarking.types import CitationExtractionResult
+
+correct = CitationExtractionResult.from_dict(
+    {
+        "cases": {
+            "588 F.3d 97": 1,
+            "604 F.2d 200": 2,
+            "335 F.3d 141": 1,
+            "954 F. Supp. 2d 145": 2,
+        },
+        "statutes": {
+            "15 U.S.C. § 1114": 1,
+        },
+    }
+)
+
+
+"""

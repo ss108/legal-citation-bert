@@ -1,0 +1,7 @@
+[lint]
+select = [
+    # Pyflakes
+    "F",
+    # isort
+    "I",
+]
