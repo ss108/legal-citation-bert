@@ -1,39 +1,23 @@
 FROM huggingface/transformers-pytorch-gpu:latest as pytorch_stage 
-
 FROM python:3.11-slim as builder
+COPY --from=ghcr.io/astral-sh/uv:0.3.3 /uv /bin/uv
 
 WORKDIR /project
 
+COPY . . 
 
-COPY docker-entrypoint.sh /project/docker-entrypoint.sh
-
-ENV PDM_HOME=/root/.pdm
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libc6-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -U pip setuptools wheel
-RUN pip install pdm
-RUN pdm install --global --project .
-RUN pdm add torch --global 
 
-RUN pip install spacy 
-RUN python -m spacy download en_core_web_sm
-# Spacy has issues being installed via PDM
+# (Optional) If you need to install specific Python packages or download resources, uncomment and modify as needed
+# RUN pip install spacy 
+# RUN python -m spacy download en_core_web_sm
+# # Spacy has issues being installed via PDM
 
-RUN pip install notebook
-RUN pip install jupyterlab
-
-RUN jupyter notebook --generate-config
-
-ENV JUPYTER_ENABLE_LAB=yes
-
-COPY ./setup/00_setup.py /root/.ipython/profile_default/startup/00_setup.py
-
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--port=8888", "--no-browser"]
-EXPOSE 8888
+RUN uv sync --dev
 
 ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]

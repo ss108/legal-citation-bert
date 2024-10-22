@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-import torch
+# import torch
 from transformers import (
     AutoConfig,
     AutoModelForTokenClassification,
@@ -9,55 +9,21 @@ from transformers import (
     PreTrainedTokenizerFast,
 )
 from wasabi import msg
-
-MODEL_NAME = "dslim/bert-base-NER"
-
-CASE_LABELS = [
-    "B-CASE_NAME",
-    "I-CASE_NAME",
-    "B-VOLUME",
-    "I-VOLUME",
-    "B-REPORTER",
-    "I-REPORTER",
-    "B-PAGE",
-    "I-PAGE",
-    "B-PIN",
-    "I-PIN",
-    "B-COURT",
-    "I-COURT",
-    "B-YEAR",
-    "I-YEAR",
-]
-
-STAT_LABELS = [
-    "B-TITLE",
-    "I-TITLE",
-    "B-CODE",
-    "I-CODE",
-    "B-SECTION",
-    "I-SECTION",
-]
-
-SHORT_LABELS = ["B-ID", "I-ID", "B-SUPRA", "I-SUPRA"]
+from src.training.constants import ALL_LABELS, MODEL_NAME
 
 
-ALL_LABELS = CASE_LABELS + STAT_LABELS + SHORT_LABELS + ["O"]
+# def get_base_model():
+#     # Load the configuration from the pre-trained model
+#     config = AutoConfig.from_pretrained(MODEL_NAME)
 
-LABEL_MAP = {label: i for i, label in enumerate(ALL_LABELS)}
+#     # Create the model with the original configuration
+#     model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME, config=config)
 
+#     # Modify the classifier to match the number of your labels
+#     model.classifier = torch.nn.Linear(config.hidden_size, len(ALL_LABELS))
+#     model.num_labels = len(ALL_LABELS)
 
-def get_base_model():
-    # Load the configuration from the pre-trained model
-    config = AutoConfig.from_pretrained(MODEL_NAME)
-
-    # Create the model with the original configuration
-    model = AutoModelForTokenClassification.from_pretrained(MODEL_NAME, config=config)
-
-    # Modify the classifier to match the number of your labels
-    model.classifier = torch.nn.Linear(config.hidden_size, len(ALL_LABELS))
-    model.num_labels = len(ALL_LABELS)
-
-    return model
+#     return model
 
 
 def get_tokenizer() -> PreTrainedTokenizerFast:
