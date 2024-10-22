@@ -121,14 +121,14 @@ async def llm_extract_citations_from_document(doc: str) -> CitationExtractionRes
     chunks = chunk_by_token(doc)
     full_count: CitationExtractionResult = await extract_citations_from_chunks(chunks)
 
-    cases = full_count.cases
+    # cases = full_count.cases
 
-    if len(cases) > 0:
-        reformatted = await chat(
-            system_prompt=FORMAT_PROMPT,
-            messages=[{"role": "user", "content": str(cases)}],
-        )
-        full_count.cases = json.loads(reformatted)
+    # if len(cases) > 0:
+    #     reformatted = await chat(
+    #         system_prompt=FORMAT_PROMPT,
+    #         messages=[{"role": "user", "content": str(cases)}],
+    #     )
+    #     full_count.cases = json.loads(reformatted)
 
     return full_count
 
