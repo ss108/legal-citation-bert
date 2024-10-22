@@ -181,7 +181,7 @@ wheels = [
 [[package]]
 name = "cit-parser"
 version = "0.1.0"
-source = { git = "https://github.com/ss108/cit-parser.git?rev=dir#5aeb586c33c077993920c4704b063ad5361b3fdd" }
+source = { git = "https://github.com/ss108/cit-parser.git?rev=dir#080d00294d0649b49c4f22e46ea30dafaa146f01" }
 dependencies = [
     { name = "pydantic" },
     { name = "python-dotenv" },
