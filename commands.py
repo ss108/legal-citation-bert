@@ -13,6 +13,7 @@ from transformers import (
 )
 
 from wasabi import msg
+from cit_parser import invoke
 
 
 from src.data.generate import (
@@ -165,6 +166,13 @@ def test_from_hub():
         print(res)
 
     return
+
+
+@app.command()
+def test_lib():
+    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain."""
+    res = invoke(text)
+    print(res)
 
 
 if __name__ == "__main__":
