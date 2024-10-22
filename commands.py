@@ -55,7 +55,6 @@ from src.benchmarking.items import TEST_ITEMS
 from src.benchmarking.llm import llm_extract_citations_from_document
 from src.benchmarking.model import authorities_to_citation_extraction_result
 from src.benchmarking.types import BenchmarkResult, CitationExtractionResult
-from .benchmark import llm_extract_citations_for_item
 
 
 app = typer.Typer()
@@ -162,6 +161,12 @@ def push_to_hub():
 
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_NAME)
     tokenizer.push_to_hub("ss108/legal-citation-bert", use_temp_dir=True)  # pyright: ignore
+
+
+@app.command()
+def inspect_data():
+    ds = load_candidate_ds(version="v1")
+    print(f"Dataset length: {len(ds)}")
 
 
 @app.command()

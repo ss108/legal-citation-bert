@@ -93,26 +93,73 @@ document (hereinafter, a “Notice of Change”). See 8 U.S.C. § 1229(a)(2). ""
         CitationExtractionResult(cases={}, statutes={}),
     ),  # https://casetext.com/case/united-states-v-papadopoulos
     (
-        """In addition, he waived "any right to challenge [his] conviction . . . or sentence . . . or otherwise attempt to modify or change the  sentence or the manner in which it was determined in any collateral attack, including, but not limited to, a motion brought under 28 U.S.C. § 2255 or Federal Rule of Civil Procedure 60(b), except to the extent such a motion is based on newly discovered evidence or on a claim that [he] received ineffective assistance of counsel."...the Court sentenced Papadopoulos to a within-guidelines sentence of 14 days of incarceration, one year of supervised release, 200 hours of community service, and a fine of $9,500. The Court allowed Papadopoulos to self-surrender at an institution designated by the Bureau of Prisons, as notified by the Probation Office. Under these terms, Papadopoulos is due to begin serving his term of incarceration on Monday, November 26, 2018.""",
+        """In addition, he waived "any right to challenge [his] conviction . . . or sentence . . . or otherwise attempt to modify or change the  sentence or the manner in which it was determined in any collateral attack, including, but not limited to, a motion brought under 28 U.S.C. § 2255.""",
         CitationExtractionResult(
             cases={},
             statutes={
                 "28 U.S.C. § 2255": 1,
-                "Federal Rule of Civil Procedure 60(b)": 1,
             },
         ),
     ),
     (
-        """has failed to demonstrate that the D.C. Circuit is likely to conclude that the appointment of the Special Counsel was unlawful—and, indeed, he has failed even to show that the appeal raises a "close question" that "very well could be decided" against the Special Counsel, id. at 6 (quoting United States v. Quinn, 416 F. Supp. 2d 133, 136 (D.D.C. 2006)). Chief Judge Howell and Judge Friedrich have both issued thorough and carefully reasoned opinions rejecting the arguments that Papadopoulos now champions. See Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.); In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.). 
-
-""",
+        """The court in Williams v. Carter, 645 F.2d 847 (10th Cir. 1981), concluded that the employer's actions constituted wrongful termination. Furthermore, in Adams v. Thompson, 715 F.2d 993 (5th Cir. 1983), the court found that the plaintiff was entitled to damages for breach of contract. This position was also reinforced by the decision in Brown v. Smith, 723 F.2d 1234 (4th Cir. 1984), where the court emphasized the necessity of good faith in employment contracts. See also Harris v. Davis, 600 F.2d 200 (8th Cir. 1979), where the court addressed similar claims involving contractual disputes. Lastly, the case of Nelson v. Knight, 765 F.2d 130 (D.C. Cir. 1985), highlighted the role of equitable estoppel in contract law.""",
         CitationExtractionResult(
             cases={
-                "United States v. Quinn, 416 F. Supp. 2d 133, 136 (D.D.C. 2006)": 1,
-                "Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.)": 1,
-                "In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.)": 1,
+                "Williams v. Carter, 645 F.2d 847 (10th Cir. 1981)": 1,
+                "Adams v. Thompson, 715 F.2d 993 (5th Cir. 1983)": 1,
+                "Brown v. Smith, 723 F.2d 1234 (4th Cir. 1984)": 1,
+                "Harris v. Davis, 600 F.2d 200 (8th Cir. 1979)": 1,
+                "Nelson v. Knight, 765 F.2d 130 (D.C. Cir. 1985)": 1,
             },
             statutes={},
         ),
+    ),
+    (
+        """To grant a stay under these circumstances would run counter to the "strong equitable presumption against grant of a stay where a claim could have been brought at such a time as to allow consideration of the merits  without requiring the entry of a stay." Hill v. McDonough, 547 U.S. 573, 584 (2006) ... Here is a fake citation to a statute: 18 U.S.C. § 1234.""",
+        CitationExtractionResult(
+            cases={
+                "Hill v. McDonough, 547 U.S. 573, 584 (2006)": 1,
+            },
+            statutes={"18 U.S.C. § 1234": 1},
+        ),
     ),  # https://casetext.com/case/united-states-v-papadopoulos
+    (
+        """Instead, Plaintiff must offer "substantial evidence" of discrimination, and "it is not enough for the employee to raise triable issues of fact concerning whether the employer's reasons for [the employment action] were sound." See California Gov’t Code § 12940(h).
+    """,
+        CitationExtractionResult(
+            cases={},
+            statutes={"California Gov’t Code § 12940(h)": 1},
+        ),
+    ),
+    (
+        """This understanding of falsity accords with common
+    sense. On petitioner’s view, a child’s statement that she
+    “ate one cookie,” after having cleaned out the whole
+    cookie jar, would not be a “false” statement because it
+    could be viewed as technically true: she ate one, and
+    then all the rest. Similarly, petitioner would not have made a false statement here even if he had claimed to
+    owe $500 (or any nonzero amount) and disputed the real, higher figure. That hypertechnical view of what it
+    means for a statement to be “false” is untenable and inconsistent with normal usage.
+    Other features of Section 1014’s text reinforce its coverage of statements that falsely imply that they are
+    the whole truth.... 18 U.S.C. 1014, which “suggests a broad meaning.” Ali v. Federal Bureau of Prisons, 552 U.S. 214, 219 (2008).
+    """,
+        CitationExtractionResult(
+            cases={
+                "Diaz v. United States, 144 S. Ct. 1727, 1735 (2024)": 1,
+                "Ali v. Federal Bureau of Prisons, 552 U.S. 214, 219 (2008)": 1,
+            },
+            statutes={"18 U.S.C. 1014": 2},
+        ),
+    ),
+    (
+        """In the case of Smith v. Jones, 456 F.2d 789 (2d Cir. 1973), the court held that the plaintiff’s claims were barred by the statute of limitations. Similarly, in Doe v. Brown, 512 F.2d 1010 (7th Cir. 1975), the court emphasized the importance of timely filing for claims. Additionally, in Johnson v. United States, 678 F.2d 123 (9th Cir. 1982), the court ruled that equitable tolling did not apply under these circumstances.""",
+        CitationExtractionResult(
+            cases={
+                "Smith v. Jones, 456 F.2d 789 (2d Cir. 1973)": 1,
+                "Doe v. Brown, 512 F.2d 1010 (7th Cir. 1975)": 1,
+                "Johnson v. United States, 678 F.2d 123 (9th Cir. 1982)": 1,
+            },
+            statutes={},
+        ),
+    ),
 ]

@@ -1,4 +1,3 @@
-
 MODEL_NAME = "dslim/bert-base-NER"
 
 CASE_LABELS = [
@@ -26,6 +25,7 @@ STAT_LABELS = [
     "B-SECTION",
     "I-SECTION",
 ]
+
 
 SHORT_LABELS = ["B-ID", "I-ID", "B-SUPRA", "I-SUPRA"]
 
