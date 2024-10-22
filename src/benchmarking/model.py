@@ -8,7 +8,6 @@ from src.training.model import (
     get_tokenizer,
     # load_model_from_checkpoint,
 )
-from .temp_aggregation import LabelPrediction
 from wasabi import msg
 
 
@@ -56,9 +55,7 @@ def split_text(text: str) -> List[str]:
     return sentences
 
 
-def get_labels(
-    text: str, model: AutoModelForTokenClassification
-) -> List[LabelPrediction]:
+def get_labels(text: str, model: AutoModelForTokenClassification) -> List[str]:
     """
     Tokenizes the text, performs inference with the model, and returns predicted labels.
     """

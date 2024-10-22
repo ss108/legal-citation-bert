@@ -10,19 +10,11 @@ from transformers import BertTokenizerFast
 from transformers import (
     AutoModelForTokenClassification,
     BertTokenizerFast,
-    AutoTokenizer,
 )
 
 from wasabi import msg
 
-from src.benchmarking.model import get_labels, split_text
 
-from src.benchmarking.temp_aggregation import (
-    CaselawCitation,
-    LabelPrediction,
-    aggregate_entities,
-    citations_from,
-)
 from src.data.generate import (
     Sentence,
     generate_prose_statute_citation,
@@ -32,7 +24,6 @@ from src.data.generate import (
 from src.data.prepare import (
     RAW_DATA_DIR,
     create_candidate_dataset,
-    delete_from_cache,
     do_sentences,
     gather_wrapper,
     load_candidate_ds,
@@ -50,6 +41,8 @@ from src.training.model import (
     MODEL_NAME,
     get_tokenizer,
     load_model_from_checkpoint,
+    split_text,
+    get_labels,
 )
 from src.training.train import test_predict, train_model
 
@@ -83,11 +76,6 @@ async def gen_prose_statute_data():
 def test_gen():
     res = asyncio.run(generate_unofficial_citation(2))
     print(res)
-
-
-@app.command()
-def delete_cached_file(name: str):
-    delete_from_cache(name)
 
 
 @app.command()
@@ -155,23 +143,6 @@ def process_cl_docs():
 #         print(f)
 
 
-# @app.command()
-# def test_model_agg():
-#     model = get_model()
-
-#     text = """ The confusion
-# could also be a mistaken belief that the plaintiff approves of the defendant’s use of the allegedly infringing mark and the underlying good or service to which it is applied. Dallas Cowboys Cheerleaders, Inc. v Pussycat Cinema, Ltd., 604 F.2d 200, 204 (2d Cir. 1979). Damage to the
-# plaintiff’s reputation by association with the defendant and"""
-
-#     sentences = split_text(text)
-
-#     for s in sentences:
-#         res = get_labels(s, model)
-#         cits = citations_from(res)
-#         if len(cits) > 0:
-#             print(cits)
-
-
 @app.command()
 def push_to_hub():
     model = load_model_from_checkpoint()
@@ -182,15 +153,9 @@ def push_to_hub():
 
 
 @app.command()
-def hoi():
-    print("hoi")
-
-
-@app.command()
 def test_from_hub():
     # Load model and tokenizer from Hugging Face Hub
     model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
-    tokenizer = AutoTokenizer.from_pretrained("ss108/legal-citation-bert")
 
     # Test with a sample input
     test_text = "Fexler v. Hock, 123 U.S. 456, 499 (2021)"  # Sample text
@@ -200,26 +165,6 @@ def test_from_hub():
         print(res)
 
     return
-
-    # Tokenize input
-    tokenized_input = tokenizer(test_text, return_tensors="pt", padding=True)
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Perform inference (prediction)
-    with torch.no_grad():
-        outputs = model(**tokenized_input)
-        logits = outputs.logits
-        predictions = torch.argmax(logits, dim=-1)
-
-    # Get predicted labels
-    predicted_labels = [model.config.id2label[p.item()] for p in predictions[0]]
-    tokens = tokenizer.convert_ids_to_tokens(tokenized_input["input_ids"][0])  # pyright: ignore
-
-    # Print tokens and their predicted labels
-    for token, label in zip(tokens, predicted_labels):
-        print(f"{token} -> {label}")
 
 
 if __name__ == "__main__":

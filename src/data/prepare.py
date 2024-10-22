@@ -283,7 +283,3 @@ def load_for_training(version: str = "v0") -> DatasetDict:
 
 def load_final_splits():
     return DatasetDict.load_from_disk(Path(HF_CACHE_DIR) / "final_splits_v0")  # pyright: ignore
-
-
-def delete_from_cache(name: str):
-    shutil.rmtree(Path(HF_CACHE_DIR) / name)
