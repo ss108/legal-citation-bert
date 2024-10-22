@@ -13,6 +13,7 @@ from transformers import (
 )
 
 from wasabi import msg
+from cit_parser import invoke, organize, Authorities
 
 
 from src.data.generate import (
@@ -45,6 +46,16 @@ from src.training.model import (
     get_labels,
 )
 from src.training.train import test_predict, train_model
+import asyncio
+
+from cit_parser import Authorities, invoke, organize
+from wasabi import msg
+
+from src.benchmarking.items import TEST_ITEMS
+from src.benchmarking.llm import llm_extract_citations_from_document
+from src.benchmarking.model import authorities_to_citation_extraction_result
+from src.benchmarking.types import BenchmarkResult, CitationExtractionResult
+
 
 app = typer.Typer()
 
@@ -153,6 +164,12 @@ def push_to_hub():
 
 
 @app.command()
+def inspect_data():
+    ds = load_candidate_ds(version="v1")
+    print(f"Dataset length: {len(ds)}")
+
+
+@app.command()
 def test_from_hub():
     # Load model and tokenizer from Hugging Face Hub
     model = AutoModelForTokenClassification.from_pretrained("ss108/legal-citation-bert")
@@ -165,6 +182,18 @@ def test_from_hub():
         print(res)
 
     return
+
+
+@app.command()
+def test_lib():
+    text = """ See Niz-Chavez v. Garland, 141 S. Ct. 1474, 1478, 1486 (2021) (statute requires Notice to Appear to be “a single document containing all the information an individual needs to know
+about his removal [proceeding]”).
+In addition, if the time or place of the hearing is altered after the issuance of a Notice to Appear, DHS or
+EOIR can provide the requisite information in a later
+document (hereinafter, a “Notice of Change”). See 8 U.S.C. § 1229(a)(2). """
+    res = invoke(text)
+    a = organize(res)
+    print(a)
 
 
 if __name__ == "__main__":

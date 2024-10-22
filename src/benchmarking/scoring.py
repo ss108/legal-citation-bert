@@ -1,4 +1,3 @@
-from .llm import CitationExtractionResult
 from .types import CitationExtractionResult
 
 
