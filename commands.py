@@ -46,6 +46,17 @@ from src.training.model import (
     get_labels,
 )
 from src.training.train import test_predict, train_model
+import asyncio
+
+from cit_parser import Authorities, invoke, organize
+from wasabi import msg
+
+from src.benchmarking.items import TEST_ITEMS
+from src.benchmarking.llm import llm_extract_citations_from_document
+from src.benchmarking.model import authorities_to_citation_extraction_result
+from src.benchmarking.types import BenchmarkResult, CitationExtractionResult
+from .benchmark import llm_extract_citations_for_item
+
 
 app = typer.Typer()
 
@@ -170,7 +181,11 @@ def test_from_hub():
 
 @app.command()
 def test_lib():
-    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain. HEHEHEH Hex v. Jenkins, 56 F. 2d 123, 67 (N.D. Cal. 2021)"""
+    text = """ See Niz-Chavez v. Garland, 141 S. Ct. 1474, 1478, 1486 (2021) (statute requires Notice to Appear to be “a single document containing all the information an individual needs to know
+about his removal [proceeding]”).
+In addition, if the time or place of the hearing is altered after the issuance of a Notice to Appear, DHS or
+EOIR can provide the requisite information in a later
+document (hereinafter, a “Notice of Change”). See 8 U.S.C. § 1229(a)(2). """
     res = invoke(text)
     a = organize(res)
     print(a)

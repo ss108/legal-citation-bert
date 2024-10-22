@@ -16,7 +16,7 @@ class CitationExtractionResult(BaseModel):
             return cls(cases=d["cases"], statutes=d["statutes"])
         except Exception as e:
             msg.fail(
-                f"Error instantating CitationExtractionResult from LLM response: {e}"
+                f"Error instantiating CitationExtractionResult from LLM response: {e}"
             )
             return None
 
@@ -48,6 +48,30 @@ class CitationExtractionResult(BaseModel):
 
         return err_count
 
+    @staticmethod
+    def combine(results: List[CitationExtractionResult]) -> CitationExtractionResult:
+        combined_cases: Dict[str, int] = {}
+        combined_statutes: Dict[str, int] = {}
+
+        for result in results:
+            # Aggregate cases
+            for case, count in result.cases.items():
+                if case in combined_cases:
+                    combined_cases[case] += count
+                else:
+                    combined_cases[case] = count
+
+            # Aggregate statutes
+            for statute, count in result.statutes.items():
+                if statute in combined_statutes:
+                    combined_statutes[statute] += count
+                else:
+                    combined_statutes[statute] = count
+
+        return CitationExtractionResult(
+            cases=combined_cases, statutes=combined_statutes
+        )
+
 
 TestItem: TypeAlias = tuple[str, CitationExtractionResult]
 
@@ -61,14 +85,22 @@ class DocResult(BaseModel):
 
 class BenchmarkResult:
     def __init__(self, thingy: str):
-        self.total_errors = 0
-        self.total_tests = 0
+        self._total_errors = 0
+        self._total_tests = 0
         self.individual_results: List[DocResult] = []
         self.thingy = thingy
 
+    @property
+    def total_errors(self) -> int:
+        return self._total_errors
+
+    @property
+    def total_tests(self) -> int:
+        return self._total_tests
+
     def add_result(self, text: str, correct: int, errors: int):
-        self.total_errors += errors
-        self.total_tests += correct + errors
+        self._total_errors += errors
+        self._total_tests += correct + errors
         accuracy = 100 * correct / (correct + errors) if (correct + errors) > 0 else 0
         self.individual_results.append(
             DocResult(
@@ -102,6 +134,22 @@ class BenchmarkResult:
                 )
 
     def log_overall_results(self):
-        msg.info(
-            f"Overall accuracy for {self.thingy} across all test items: {self.overall_accuracy:.2f}%"
+        message_text = f"Overall accuracy for {self.thingy} across all test items: {self.overall_accuracy:.2f}%"
+        msg.good(
+            title=f"{self.thingy} Benchmarking Results",
+            text=message_text,
         )
+
+    @staticmethod
+    def combine(results: List[BenchmarkResult]) -> BenchmarkResult:
+        if not results:
+            raise ValueError("No results to combine")
+
+        combined_result = BenchmarkResult(results[0].thingy)
+
+        for result in results:
+            combined_result._total_errors += result.total_errors
+            combined_result._total_tests += result.total_tests
+            combined_result.individual_results.extend(result.individual_results)
+
+        return combined_result

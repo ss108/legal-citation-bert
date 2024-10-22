@@ -10,33 +10,28 @@ from src.benchmarking.types import BenchmarkResult, CitationExtractionResult
 
 
 async def run_llm_extraction() -> BenchmarkResult:
-    benchmark_result = BenchmarkResult("LLM")
-
     tasks = [
-        llm_extract_citations_for_item(text, correct_citation, benchmark_result)
+        llm_extract_citations_for_item(text, correct_citation)
         for text, correct_citation in TEST_ITEMS
     ]
 
-    await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks)
 
-    benchmark_result.log_individual_results()
-    benchmark_result.log_overall_results()
+    combined_result = BenchmarkResult.combine(results)
 
-    return benchmark_result
+    return combined_result
 
 
 async def llm_extract_citations_for_item(
-    text: str, correct_citation, benchmark_result: BenchmarkResult
+    text: str, correct: CitationExtractionResult
 ) -> BenchmarkResult:
     res = await llm_extract_citations_from_document(text)
-    msg.info(res.dict())
 
-    err_count = correct_citation.err_count(res)
+    err_count = correct.err_count(res)
     correct_count = (
-        sum(correct_citation.cases.values())
-        + sum(correct_citation.statutes.values())
-        - err_count
+        sum(correct.cases.values()) + sum(correct.statutes.values()) - err_count
     )
+    benchmark_result = BenchmarkResult("LLM")
     benchmark_result.add_result(text, correct_count, err_count)
 
     return benchmark_result
@@ -67,16 +62,20 @@ def run_model_extraction() -> BenchmarkResult:
 
 if __name__ == "__main__":
     msg.info("Running LLM extraction...")
-    res = asyncio.run(run_llm_extraction())
-
-    res.log_individual_results()
-    res.log_overall_results()
+    llm_res = asyncio.run(run_llm_extraction())
 
     msg.info("Running model extraction...")
-    res = run_model_extraction()
+    model_res = run_model_extraction()
 
-    res.log_individual_results()
-    res.log_overall_results()
+    # model_res.log_individual_results()
+    model_res.log_overall_results()
+
+    # llm_res.log_individual_results()
+    llm_res.log_overall_results()
+
+    # relevant_item, c = TEST_ITEMS[-1]
+    # res = asyncio.run(llm_extract_citations_for_item(relevant_item, c))
+    # print(res)
 
 """
 from src.benchmarking.types import CitationExtractionResult

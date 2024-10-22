@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Dict, List
 
 import tiktoken
@@ -9,9 +10,7 @@ from src.benchmarking.types import CitationExtractionResult
 from src.openai import chat
 
 LLM_EXTRACTION_PROMPT = """
-Given a block of text and a JSON object representing citations extracted from
-the document thus far, add citations to the JSON object or increment the counts
-as needed.
+Given a block of legal text, output JSON counting citations to the caselaw and statutes therein.
 
 Output in the provided JSON format.
 
@@ -21,7 +20,7 @@ Additional rules/instructions:
 - If a caselaw citation lacks a name, use an empty string for the name. 
 - Always return a value for both keys, even if the value is an empty dict.
 - Count rules of civil procedure as statutes.
-- Do not include pincites and parentheticals (format as if for a Table of Authorities)
+- You should include pin-cites that are present in the text. 
 
 EXAMPLE:
 Input Object: {{}}
@@ -29,7 +28,7 @@ Input Text: The purpose of a motion to dismiss pursuant to Rule 12(b)(6) is to t
 the legal sufficiency of the complaint. N. Star Int'l v. Ariz. Corp. Comm'n ,
 720 F.2d 578, 581 (9th Cir. 1983). Also, a statute. 18 U.S.C. § 1961(1).
 
-Output: {{'cases': {{'N. Star Int'l v. Ariz. Corp. Comm'n, 720 F.2d 578 (9th Cir. 1983)': 1}},
+Output: {{'cases': {{'N. Star Int'l v. Ariz. Corp. Comm'n, 720 F.2d 578, 581 (9th Cir. 1983)': 1}},
 'statutes': {{'18 U.S.C. § 1961(1)': 1}}}}
 
 EXAMPLE 2:
@@ -120,8 +119,8 @@ async def llm_extract_citations_from_document(doc: str) -> CitationExtractionRes
     chunks = chunk_by_token(doc)
     full_count: CitationExtractionResult = await extract_citations_from_chunks(chunks)
 
+    # If you need to reformat the cases after aggregation, you can uncomment and use this block.
     # cases = full_count.cases
-
     # if len(cases) > 0:
     #     reformatted = await chat(
     #         system_prompt=FORMAT_PROMPT,
@@ -135,22 +134,26 @@ async def llm_extract_citations_from_document(doc: str) -> CitationExtractionRes
 async def _extract_citations_from_chunk(
     text: str, previous_result: Dict = dict()
 ) -> CitationExtractionResult:
-    res = await chat(
-        system_prompt=LLM_EXTRACTION_PROMPT.format(
-            current=str(previous_result),
-            schema=CitationExtractionResult.model_json_schema(),
-        ),
-        messages=[{"role": "user", "content": f"Input Text: {text}"}],
-    )
-    return CitationExtractionResult.model_validate_json(res)
+    try:
+        res = await chat(
+            system_prompt=LLM_EXTRACTION_PROMPT.format(
+                current=str(previous_result),
+                schema=CitationExtractionResult.model_json_schema(),
+            ),
+            messages=[{"role": "user", "content": f"Input Text: {text}"}],
+        )
+        return CitationExtractionResult.model_validate_json(res)
+    except Exception as e:
+        msg.fail(f"Error extracting citations from chunk: {e}")
+        return CitationExtractionResult(cases={}, statutes={})
 
 
 async def extract_citations_from_chunks(chunks: List[str]) -> CitationExtractionResult:
-    count = CitationExtractionResult(cases={}, statutes={})
+    results = []
+    tasks = []
 
     for c in chunks:
-        msg.warn(f"Processing chunk:\n{c}\n")
-        count = await _extract_citations_from_chunk(c, count.dict())
-        msg.info(f"Current count:\n{count.dict()}\n")
+        tasks.append(_extract_citations_from_chunk(c))
 
-    return count
+    results = await asyncio.gather(*tasks)
+    return CitationExtractionResult.combine(results)
