@@ -22,7 +22,7 @@ async def chat(
 
         resp = await client.chat.completions.create(
             model=model,
-            messages=[system_message] + messages,  # pyright: ignore
+            messages=[system_message, *messages],  # pyright: ignore
             temperature=temperature,
             response_format={"type": "json_object"},
         )
