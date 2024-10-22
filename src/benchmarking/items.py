@@ -103,14 +103,14 @@ document (hereinafter, a “Notice of Change”). See 8 U.S.C. § 1229(a)(2). ""
         ),
     ),
     (
-        """has failed to demonstrate that the D.C. Circuit is likely to conclude that the appointment of the Special Counsel was unlawful—and, indeed, he has failed even to show that the appeal raises a "close question" that "very well could be decided" against the Special Counsel, id. at 6 (quoting United States v. Quinn, 416 F. Supp. 2d 133, 136 (D.D.C. 2006)). Chief Judge Howell and Judge Friedrich have both issued thorough and carefully reasoned opinions rejecting the arguments that Papadopoulos now champions. See Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.); In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.). Those opinions reject the notion that the Special Counsel is a principal officer for purposes of the Appointments Clause; they conclude that controlling D.C. Circuit and Supreme Court authority holds that the statutes relied upon to appoint the Special Counsel vested the Acting Attorney General with the necessary authority; and they hold that the Deputy Attorney General served as the Acting Attorney General—and thus the Department head—for purposes of making the appointment. Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d at 615, 618-23, 625-26; In re: Grand Jury Investigations, 315 F. Supp. 3d at 627, 651-58, 662-67. Based on the reasoning contained in those opinions, the  Court concludes that the prospect that the D.C. Circuit will reach a contrary conclusion is remote.
+        """has failed to demonstrate that the D.C. Circuit is likely to conclude that the appointment of the Special Counsel was unlawful—and, indeed, he has failed even to show that the appeal raises a "close question" that "very well could be decided" against the Special Counsel, id. at 6 (quoting United States v. Quinn, 416 F. Supp. 2d 133, 136 (D.D.C. 2006)). Chief Judge Howell and Judge Friedrich have both issued thorough and carefully reasoned opinions rejecting the arguments that Papadopoulos now champions. See Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.); In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.). 
 
 """,
         CitationExtractionResult(
             cases={
                 "United States v. Quinn, 416 F. Supp. 2d 133, 136 (D.D.C. 2006)": 1,
-                "Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.)": 2,
-                "In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.)": 2,
+                "Concord Mgmt. & Consulting LLC, 317 F. Supp. 3d 598 (Friedrich, J.)": 1,
+                "In re: Grand Jury Investigations, 315 F. Supp. 3d 602 (Howell, C.J.)": 1,
             },
             statutes={},
         ),
