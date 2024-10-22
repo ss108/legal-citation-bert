@@ -1,6 +1,0 @@
-.git/
-training_output/
-__pypackages__
-.venv
-venv
-.env
