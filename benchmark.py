@@ -2,29 +2,23 @@ import asyncio
 
 from wasabi import msg
 
+from src.benchmarking.items import TEST_ITEMS
 from src.benchmarking.llm import llm_extract_citations_from_document
 
 
 def run_llm_extraction():
-    for file_name, data in td.items():
-        res = asyncio.run(llm_extract_citations_from_document(data.file_text))
-        msg.info("final res")
-        print(res.sort())
+    for text, c in TEST_ITEMS:
+        res = asyncio.run(llm_extract_citations_from_document(text))
+        msg.info(res.dict())
 
-        msg.warn(f"correct: {data.correct.sort()}")
-        msg.fail(f"LLM error count for {file_name}: {data.correct.err_count(res)}")
+        err_count = c.err_count(res)
+        if err_count > 3:
+            msg.fail(f"LLM error count: {c.err_count(res)}")
+        else:
+            msg.good(f"LLM error count: {c.err_count(res)}")
 
 
 run_llm_extraction()
-
-# chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
-# model = get_model()
-
-# for c in chunks:
-#     print(c)
-#     predictions = get_labels(c, model)
-#     print(predictions)
-
 """
 from src.benchmarking.types import CitationExtractionResult
 

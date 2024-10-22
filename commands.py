@@ -170,7 +170,7 @@ def test_from_hub():
 
 @app.command()
 def test_lib():
-    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain. HEHEHEH Hex v. Jenkins, 56 F. Supp. 2d 123, 67 (N.D. Cal. 2021)"""
+    text = """An employer's liability under FEHA for hostile environment sexual harassment committed by customers or clients prior to the effective date of the 2003 amendment to section 12940, subdivision (j) (Stats. 2003, ch. 671, § 1) is uncertain. HEHEHEH Hex v. Jenkins, 56 F. 2d 123, 67 (N.D. Cal. 2021)"""
     res = invoke(text)
     a = organize(res)
     print(a)

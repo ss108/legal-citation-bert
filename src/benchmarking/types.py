@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, TypeAlias
 
 from pydantic import BaseModel
+from wasabi import msg
 
 
 class CitationExtractionResult(BaseModel):
@@ -10,8 +11,14 @@ class CitationExtractionResult(BaseModel):
     statutes: Dict[str, int]
 
     @classmethod
-    def from_dict(cls, d: Dict):
-        return cls(cases=d["cases"], statutes=d["statutes"])
+    def from_dict(cls, d: Dict) -> CitationExtractionResult | None:
+        try:
+            return cls(cases=d["cases"], statutes=d["statutes"])
+        except Exception as e:
+            msg.fail(
+                f"Error instantating CitationExtractionResult from LLM response: {e}"
+            )
+            return None
 
     def sort(self):
         self.cases = dict(sorted(self.cases.items(), key=lambda x: x[0], reverse=True))
@@ -40,3 +47,6 @@ class CitationExtractionResult(BaseModel):
                 err_count += abs(correct_count - response_count)
 
         return err_count
+
+
+TestItem: TypeAlias = tuple[str, CitationExtractionResult]
