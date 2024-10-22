@@ -6,8 +6,6 @@ from pathlib import Path
 from wasabi import msg
 
 from src.benchmarking.llm import llm_extract_citations_from_document
-from src.benchmarking.model import get_labels, split_text
-from src.benchmarking.temp_aggregation import citation_from
 from src.benchmarking.test_files.loader import get_test_data
 
 TEST_FILES_DIR = Path(__file__).parent / "src" / "benchmarking" / "test_files"
@@ -39,11 +37,8 @@ def run_llm_extraction():
         msg.warn(f"correct: {data.correct.sort()}")
         msg.fail(f"LLM error count for {file_name}: {data.correct.err_count(res)}")
 
-        # llm_errs = llm_err_count(correct=data.correct, llm_extraction=res)
-        # print(f"File: {file_name}, LLM Error Count: {llm_errs}")
 
-
-# run_llm_extraction()
+run_llm_extraction()
 
 # chunks = split_text("look at this pin cite: Foo v. Bar, 551 U. S. 877, 904-907 (2007).")
 # model = get_model()
